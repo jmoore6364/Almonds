@@ -10,25 +10,27 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { ResourcesModule } from './resources/resources.module';
 import { ProvidersModule } from './providers/providers.module';
 import { BillingModule } from './billing/billing.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.production' : '.env',
     }),
 
     // Rate limiting
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
+        ttl: parseInt(process.env.THROTTLE_TTL) || 60000, // 1 minute
+        limit: parseInt(process.env.THROTTLE_LIMIT) || 100, // 100 requests per minute
       },
     ]),
 
     // Core modules
     PrismaModule,
+    HealthModule,
     AuthModule,
     UsersModule,
     OrganizationsModule,
