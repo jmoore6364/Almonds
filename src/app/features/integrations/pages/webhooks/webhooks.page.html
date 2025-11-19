@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/integrations"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Webhooks</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleCreateForm()">
+        <ion-icon slot="icon-only" [name]="showCreateForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="webhooks-container">
+    <ion-card *ngIf="showCreateForm" class="create-form-card">
+      <ion-card-header>
+        <ion-card-title>Create New Webhook</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="webhookForm" (ngSubmit)="createWebhook()">
+          <ion-item>
+            <ion-label position="stacked">Name *</ion-label>
+            <ion-input formControlName="name" placeholder="Slack Notifications"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Description</ion-label>
+            <ion-textarea formControlName="description" placeholder="Optional description" rows="2"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Webhook URL *</ion-label>
+            <ion-input formControlName="url" type="url" placeholder="https://hooks.example.com/webhook"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Events *</ion-label>
+            <ion-select formControlName="events" multiple="true" placeholder="Select events">
+              <ion-select-option *ngFor="let event of allEvents" [value]="event">
+                {{ event }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <div class="form-actions">
+            <ion-button expand="block" type="submit" [disabled]="webhookForm.invalid">
+              Create Webhook
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="toggleCreateForm()">
+              Cancel
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Webhooks</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="webhooks$ | async as webhooks">
+          <ion-item *ngFor="let webhook of webhooks">
+            <ion-icon slot="start" name="git-network-outline" [color]="getStatusColor(webhook.status)"></ion-icon>
+            <ion-label>
+              <h3>{{ webhook.name }}</h3>
+              <p>{{ webhook.description }}</p>
+              <p class="webhook-url">{{ webhook.url }}</p>
+              <div class="webhook-stats">
+                <ion-chip outline="true">
+                  <ion-label>{{ webhook.stats.totalDeliveries }} deliveries</ion-label>
+                </ion-chip>
+                <ion-chip outline="true" color="success">
+                  <ion-label>{{ webhook.stats.successfulDeliveries }} success</ion-label>
+                </ion-chip>
+                <ion-chip outline="true" [color]="webhook.stats.failedDeliveries > 0 ? 'danger' : 'medium'">
+                  <ion-label>{{ webhook.stats.failedDeliveries }} failed</ion-label>
+                </ion-chip>
+                <ion-chip outline="true">
+                  <ion-label>{{ webhook.stats.averageResponseTime }}ms avg</ion-label>
+                </ion-chip>
+              </div>
+            </ion-label>
+            <ion-button slot="end" fill="clear" (click)="testWebhook(webhook, $event)">
+              <ion-icon slot="icon-only" name="play-outline"></ion-icon>
+            </ion-button>
+            <ion-toggle slot="end" [checked]="webhook.enabled" (ionChange)="toggleWebhook(webhook)" color="success"></ion-toggle>
+            <ion-button slot="end" fill="clear" color="danger" (click)="deleteWebhook(webhook, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

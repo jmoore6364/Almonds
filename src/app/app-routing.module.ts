@@ -46,6 +46,10 @@ const routes: Routes = [
   {
     path: 'audit',
     loadChildren: () => import('./features/audit/audit.module').then(m => m.AuditModule)
+  },
+  {
+    path: 'integrations',
+    loadChildren: () => import('./features/integrations/integrations.module').then(m => m.IntegrationsModule)
   }
 ];
 

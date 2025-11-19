@@ -1,0 +1,72 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/integrations"></ion-back-button>
+    </ion-buttons>
+    <ion-title>IaC Templates</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="filterType" (ionChange)="onFilterChange()">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button *ngFor="let type of templateTypes" [value]="type">
+        <ion-label>{{ type | titlecase }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="templates-container">
+    <ion-grid>
+      <ion-row>
+        <ion-col *ngFor="let template of (templates$ | async)" size="12" size-md="6" size-lg="4">
+          <ion-card [button]="true" (click)="viewTemplate(template)">
+            <ion-card-header>
+              <div class="card-header-content">
+                <ion-card-title>{{ template.name }}</ion-card-title>
+                <ion-badge [color]="getTypeColor(template.type)">
+                  {{ template.type | uppercase }}
+                </ion-badge>
+              </div>
+              <ion-card-subtitle>{{ template.category }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <p>{{ template.description }}</p>
+              <div class="template-meta">
+                <div class="meta-item">
+                  <ion-icon name="rocket-outline"></ion-icon>
+                  <span>{{ template.deployments }} deployments</span>
+                </div>
+                <div class="meta-item" *ngIf="template.rating">
+                  <ion-icon name="star" color="warning"></ion-icon>
+                  <span>{{ template.rating }}</span>
+                </div>
+                <div class="meta-item">
+                  <ion-icon name="code-working-outline"></ion-icon>
+                  <span>{{ template.variables.length }} variables</span>
+                </div>
+              </div>
+              <div class="template-tags">
+                <ion-chip *ngFor="let tag of template.tags.slice(0, 3)" outline="true">
+                  <ion-label>{{ tag }}</ion-label>
+                </ion-chip>
+              </div>
+              <div class="template-actions">
+                <ion-button expand="block" (click)="deployTemplate(template, $event)">
+                  <ion-icon slot="start" name="rocket-outline"></ion-icon>
+                  Deploy
+                </ion-button>
+                <ion-button expand="block" fill="outline" *ngIf="!template.isPublic" (click)="deleteTemplate(template, $event)">
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Delete
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>

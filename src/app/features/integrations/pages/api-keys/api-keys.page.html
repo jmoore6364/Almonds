@@ -1,0 +1,109 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/integrations"></ion-back-button>
+    </ion-buttons>
+    <ion-title>API Keys</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleCreateForm()">
+        <ion-icon slot="icon-only" [name]="showCreateForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="api-keys-container">
+    <ion-card *ngIf="showCreateForm" class="create-form-card">
+      <ion-card-header>
+        <ion-card-title>Create New API Key</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="apiKeyForm" (ngSubmit)="createApiKey()">
+          <ion-item>
+            <ion-label position="stacked">Name *</ion-label>
+            <ion-input formControlName="name" placeholder="Production API Key"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Description</ion-label>
+            <ion-textarea formControlName="description" placeholder="Optional description" rows="2"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Scopes *</ion-label>
+            <ion-select formControlName="scopes" multiple="true" placeholder="Select scopes">
+              <ion-select-option *ngFor="let scope of allScopes" [value]="scope">
+                {{ scope }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Requests Per Minute</ion-label>
+            <ion-input formControlName="requestsPerMinute" type="number" placeholder="60"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Expires In (Days)</ion-label>
+            <ion-input formControlName="expiresInDays" type="number" placeholder="Leave empty for no expiration"></ion-input>
+          </ion-item>
+
+          <div *ngIf="newApiKeyPlainText" class="api-key-display">
+            <p><strong>Your new API key (copy it now):</strong></p>
+            <div class="key-container">
+              <code>{{ newApiKeyPlainText }}</code>
+              <ion-button fill="clear" (click)="copyApiKey()">
+                <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+              </ion-button>
+            </div>
+            <ion-note color="warning">This key will only be shown once. Store it securely!</ion-note>
+          </div>
+
+          <div class="form-actions">
+            <ion-button expand="block" type="submit" [disabled]="apiKeyForm.invalid">
+              Create API Key
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="toggleCreateForm()">
+              Cancel
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All API Keys</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="apiKeys$ | async as apiKeys">
+          <ion-item *ngFor="let key of apiKeys">
+            <ion-icon slot="start" name="key-outline" [color]="getStatusColor(key.status)"></ion-icon>
+            <ion-label>
+              <h3>{{ key.name }}</h3>
+              <p>{{ key.description }}</p>
+              <p class="key-prefix"><code>{{ key.prefix }}</code></p>
+              <div class="key-stats">
+                <ion-chip outline="true">
+                  <ion-label>{{ key.usage.totalRequests }} requests</ion-label>
+                </ion-chip>
+                <ion-chip outline="true">
+                  <ion-label>{{ formatBytes(key.usage.bandwidthUsed) }}</ion-label>
+                </ion-chip>
+                <ion-chip outline="true" [color]="key.usage.errorRate > 5 ? 'danger' : 'success'">
+                  <ion-label>{{ key.usage.errorRate.toFixed(1) }}% errors</ion-label>
+                </ion-chip>
+              </div>
+            </ion-label>
+            <ion-badge slot="end" [color]="getStatusColor(key.status)">
+              {{ key.status | titlecase }}
+            </ion-badge>
+            <ion-button slot="end" fill="clear" color="warning" (click)="revokeApiKey(key, $event)" *ngIf="key.status === 'active'">
+              <ion-icon slot="icon-only" name="ban-outline"></ion-icon>
+            </ion-button>
+            <ion-button slot="end" fill="clear" color="danger" (click)="deleteApiKey(key, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Integrations & API</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="integrations-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Integration Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="overview-grid">
+          <div class="overview-item" (click)="viewApiKeys()">
+            <ion-icon name="key-outline" color="primary"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (apiKeysCount$ | async) || 0 }}</h3>
+              <p>API Keys</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewWebhooks()">
+            <ion-icon name="git-network-outline" color="success"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (webhooksCount$ | async) || 0 }}</h3>
+              <p>Webhooks</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewIacTemplates()">
+            <ion-icon name="code-slash-outline" color="warning"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (templatesCount$ | async) || 0 }}</h3>
+              <p>IaC Templates</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewIacTemplates()">
+            <ion-icon name="rocket-outline" color="tertiary"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (deploymentsCount$ | async) || 0 }}</h3>
+              <p>Deployments</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Quick Actions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item button (click)="viewApiKeys()">
+            <ion-icon slot="start" name="key-outline" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Manage API Keys</h3>
+              <p>Create and manage API keys for programmatic access</p>
+            </ion-label>
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-item>
+          <ion-item button (click)="viewWebhooks()">
+            <ion-icon slot="start" name="git-network-outline" color="success"></ion-icon>
+            <ion-label>
+              <h3>Configure Webhooks</h3>
+              <p>Set up webhooks for real-time event notifications</p>
+            </ion-label>
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-item>
+          <ion-item button (click)="viewIacTemplates()">
+            <ion-icon slot="start" name="code-slash-outline" color="warning"></ion-icon>
+            <ion-label>
+              <h3>Infrastructure as Code</h3>
+              <p>Browse and deploy IaC templates</p>
+            </ion-label>
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>API Documentation</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Access comprehensive API documentation to integrate Almonds with your applications and workflows.</p>
+        <ion-button expand="block" fill="outline">
+          <ion-icon slot="start" name="book-outline"></ion-icon>
+          View API Docs
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
