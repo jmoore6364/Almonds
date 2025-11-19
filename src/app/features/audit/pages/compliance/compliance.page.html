@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/audit"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Compliance Reports</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="generateReport()">
+        <ion-icon slot="icon-only" name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="compliance-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Compliance Reports</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="reports$ | async as reports">
+          <ion-item *ngFor="let report of reports" [button]="true">
+            <ion-icon slot="start" name="shield-checkmark-outline" [color]="getStatusColor(report.status)"></ion-icon>
+            <ion-label>
+              <h3>{{ report.framework | uppercase }} Compliance Report</h3>
+              <p>Generated: {{ report.generatedAt | date:'short' }}</p>
+              <p class="compliance-score">Score: {{ report.score }}%</p>
+            </ion-label>
+            <ion-badge [color]="getStatusColor(report.status)">
+              {{ report.status | titlecase }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

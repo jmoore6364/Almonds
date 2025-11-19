@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/audit"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Audit Logs</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportLogs('csv')">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="logs-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Audit Logs</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="auditLogs$ | async as logs">
+          <ion-item *ngFor="let log of logs">
+            <ion-icon slot="start" name="document-text-outline"></ion-icon>
+            <ion-label>
+              <h3>{{ log.action | titlecase }} - {{ log.resourceType }}</h3>
+              <p>{{ log.userName }}</p>
+              <p class="log-time">{{ log.timestamp | date:'medium' }}</p>
+            </ion-label>
+            <ion-badge [color]="log.status === 'success' ? 'success' : 'danger'">
+              {{ log.status | titlecase }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

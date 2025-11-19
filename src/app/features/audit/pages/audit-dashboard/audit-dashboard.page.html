@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Audit & Compliance</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="audit-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="overview-grid">
+          <div class="overview-item" (click)="viewAllLogs()">
+            <ion-icon name="document-text-outline" color="primary"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (totalLogs$ | async) || 0 }}</h3>
+              <p>Audit Logs</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewCompliance()">
+            <ion-icon name="shield-checkmark-outline" color="success"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (complianceReports$ | async)?.length || 0 }}</h3>
+              <p>Compliance Reports</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Recent Audit Logs</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewAllLogs()">
+            View All
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="recentAuditLogs$ | async as logs">
+          <ion-item *ngFor="let log of logs">
+            <ion-icon slot="start" name="information-circle-outline"></ion-icon>
+            <ion-label>
+              <h3>{{ log.action | titlecase }} - {{ log.resourceType }}</h3>
+              <p>{{ log.userName }} - {{ log.timestamp | date:'short' }}</p>
+            </ion-label>
+            <ion-badge [color]="log.status === 'success' ? 'success' : 'danger'">
+              {{ log.status | titlecase }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
