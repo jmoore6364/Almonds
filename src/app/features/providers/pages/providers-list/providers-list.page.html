@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cloud Providers</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="providers-container">
+    <ion-card class="intro-card">
+      <ion-card-header>
+        <ion-card-title>Connect Your Cloud Providers</ion-card-title>
+        <ion-card-subtitle>Manage all your cloud resources in one place</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          Connect your cloud provider accounts to view and manage resources across
+          AWS, Azure, Railway, Supabase, and more from a single dashboard.
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <div *ngIf="providers$ | async as providers">
+      <ion-card *ngFor="let provider of providers" class="provider-card">
+        <ion-card-content>
+          <div class="provider-content">
+            <div class="provider-info">
+              <div class="provider-header">
+                <ion-icon [name]="getProviderIcon(provider.provider)" class="provider-icon"></ion-icon>
+                <div class="provider-details">
+                  <h2>{{ provider.displayName }}</h2>
+                  <p>{{ provider.name }}</p>
+                </div>
+              </div>
+
+              <ion-badge [color]="getStatusColor(provider.status)" class="status-badge">
+                {{ provider.status }}
+              </ion-badge>
+            </div>
+
+            <div class="provider-meta" *ngIf="isConnected(provider.status)">
+              <div class="meta-item" *ngIf="provider.connectedAt">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Connected {{ provider.connectedAt | date:'short' }}</span>
+              </div>
+              <div class="meta-item" *ngIf="provider.lastSyncedAt">
+                <ion-icon name="sync-outline"></ion-icon>
+                <span>Last synced {{ provider.lastSyncedAt | date:'short' }}</span>
+              </div>
+              <div class="meta-item" *ngIf="provider.region">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ provider.region }}</span>
+              </div>
+            </div>
+
+            <div class="provider-actions">
+              <ion-button
+                *ngIf="!isConnected(provider.status)"
+                expand="block"
+                (click)="connectProvider(provider)">
+                <ion-icon name="link-outline" slot="start"></ion-icon>
+                Connect
+              </ion-button>
+
+              <div *ngIf="isConnected(provider.status)" class="connected-actions">
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  (click)="connectProvider(provider)">
+                  <ion-icon name="settings-outline" slot="start"></ion-icon>
+                  Configure
+                </ion-button>
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  color="danger"
+                  (click)="disconnectProvider(provider, $event)">
+                  <ion-icon name="unlink-outline" slot="start"></ion-icon>
+                  Disconnect
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card class="help-card">
+      <ion-card-header>
+        <ion-card-title>Need Help?</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          Check out our <a routerLink="/training">training modules</a> to learn how to
+          connect and manage your cloud provider accounts.
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

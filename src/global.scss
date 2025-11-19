@@ -1,0 +1,57 @@
+/*
+ * App Global CSS
+ */
+
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Custom Global Styles */
+:root {
+  --almonds-primary: #3880ff;
+  --almonds-secondary: #3dc2ff;
+  --almonds-tertiary: #5260ff;
+  --almonds-success: #2dd36f;
+  --almonds-warning: #ffc409;
+  --almonds-danger: #eb445a;
+}
+
+.provider-card {
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resource-item {
+  border-bottom: 1px solid var(--ion-color-light);
+  padding: 12px 16px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.active {
+    background-color: var(--almonds-success);
+    color: white;
+  }
+
+  &.inactive {
+    background-color: var(--ion-color-medium);
+    color: white;
+  }
+
+  &.error {
+    background-color: var(--almonds-danger);
+    color: white;
+  }
+}

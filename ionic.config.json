@@ -1,0 +1,7 @@
+{
+  "name": "almonds-resource-manager",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

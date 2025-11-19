@@ -1,0 +1,61 @@
+.detail-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cost-display {
+  text-align: center;
+  padding: 20px;
+
+  h2 {
+    font-size: 48px;
+    margin: 0;
+    color: var(--ion-color-primary);
+  }
+
+  p {
+    margin: 8px 0 0 0;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  ion-chip {
+    margin: 0;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-list {
+  padding: 0;
+}

@@ -1,0 +1,147 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Almonds Resource Manager</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/training">
+        <ion-icon name="school-outline"></ion-icon>
+      </ion-button>
+      <ion-button>
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="dashboard-container">
+    <!-- Welcome Section -->
+    <ion-card *ngIf="user$ | async as user">
+      <ion-card-header>
+        <ion-card-title>Welcome back, {{ user.name }}!</ion-card-title>
+        <ion-card-subtitle>Here's your resource overview</ion-card-subtitle>
+      </ion-card-header>
+    </ion-card>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" *ngIf="stats$ | async as stats">
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-content">
+            <ion-icon name="layers-outline" color="primary"></ion-icon>
+            <div class="stat-info">
+              <h2>{{ stats.totalResources }}</h2>
+              <p>Total Resources</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-content">
+            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+            <div class="stat-info">
+              <h2>{{ stats.activeResources }}</h2>
+              <p>Active Resources</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-content">
+            <ion-icon name="cloud-outline" color="secondary"></ion-icon>
+            <div class="stat-info">
+              <h2>{{ stats.connectedProviders }}</h2>
+              <p>Connected Providers</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <div class="stat-content">
+            <ion-icon name="cash-outline" color="warning"></ion-icon>
+            <div class="stat-info">
+              <h2>${{ stats.totalCost.toFixed(2) }}</h2>
+              <p>Monthly Cost</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Quick Actions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="action-buttons">
+          <ion-button expand="block" (click)="navigateToResources()">
+            <ion-icon name="layers-outline" slot="start"></ion-icon>
+            View All Resources
+          </ion-button>
+          <ion-button expand="block" (click)="navigateToProviders()" color="secondary">
+            <ion-icon name="cloud-outline" slot="start"></ion-icon>
+            Manage Providers
+          </ion-button>
+          <ion-button expand="block" (click)="navigateToTraining()" color="tertiary">
+            <ion-icon name="school-outline" slot="start"></ion-icon>
+            Training Modules
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Recent Resources -->
+    <ion-card *ngIf="resources$ | async as resources">
+      <ion-card-header>
+        <ion-card-title>Recent Resources</ion-card-title>
+        <ion-card-subtitle>Latest 5 resources</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="resources.length > 0; else noResources">
+          <ion-item *ngFor="let resource of resources.slice(0, 5)">
+            <ion-icon [name]="getProviderIcon(resource.provider)" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ resource.name }}</h3>
+              <p>{{ resource.type }} - {{ resource.provider }}</p>
+            </ion-label>
+            <ion-badge [color]="resource.status === 'active' ? 'success' : 'medium'" slot="end">
+              {{ resource.status }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+        <ng-template #noResources>
+          <p class="no-data">No resources yet. Connect a provider to get started!</p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Provider Status -->
+    <ion-card *ngIf="providers$ | async as providers">
+      <ion-card-header>
+        <ion-card-title>Provider Status</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let provider of providers">
+            <ion-icon [name]="getProviderIcon(provider.provider)" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ provider.displayName }}</h3>
+              <p>{{ provider.status }}</p>
+            </ion-label>
+            <ion-badge
+              [color]="provider.status === 'connected' ? 'success' : 'medium'"
+              slot="end">
+              {{ provider.status }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

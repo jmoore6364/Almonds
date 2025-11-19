@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Training Modules</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="training-container">
+    <ion-card class="intro-card">
+      <ion-card-header>
+        <ion-card-title>Welcome to Training</ion-card-title>
+        <ion-card-subtitle>Learn how to manage cloud resources effectively</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          Our training modules are designed to help new developers understand cloud platforms,
+          resource management, and best practices. Start with beginner modules and work your way up!
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <div *ngIf="modules$ | async as modules">
+      <ion-card *ngFor="let module of modules" class="module-card" (click)="viewModule(module)">
+        <ion-card-header>
+          <div class="module-header">
+            <ion-card-title>{{ module.title }}</ion-card-title>
+            <ion-badge [color]="getDifficultyColor(module.difficulty)">
+              {{ module.difficulty }}
+            </ion-badge>
+          </div>
+          <ion-card-subtitle>{{ module.description }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="module-info">
+            <div class="info-item">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ module.estimatedMinutes }} min</span>
+            </div>
+            <div class="info-item">
+              <ion-icon name="book-outline"></ion-icon>
+              <span>{{ module.lessons.length }} lessons</span>
+            </div>
+          </div>
+
+          <div class="module-tags" *ngIf="module.tags.length > 0">
+            <ion-chip *ngFor="let tag of module.tags" outline="true">
+              <ion-label>{{ tag }}</ion-label>
+            </ion-chip>
+          </div>
+
+          <div class="prerequisites" *ngIf="module.prerequisites && module.prerequisites.length > 0">
+            <ion-text color="medium">
+              <p><small>Prerequisites: {{ module.prerequisites.length }} module(s)</small></p>
+            </ion-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

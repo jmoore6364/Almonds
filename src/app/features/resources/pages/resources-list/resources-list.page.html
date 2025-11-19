@@ -1,0 +1,120 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Resources</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refreshResources()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Search and Filter Toolbar -->
+  <ion-toolbar>
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Search resources..."
+      debounce="300">
+    </ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedProvider" (ionChange)="onProviderChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="aws">
+        <ion-label>AWS</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="azure">
+        <ion-label>Azure</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="railway">
+        <ion-label>Railway</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="supabase">
+        <ion-label>Supabase</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refreshResources($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="resources-container">
+    <!-- Filter Options -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Resource Type</ion-label>
+          <ion-select [(ngModel)]="selectedType" (ionChange)="onTypeChange($event)">
+            <ion-select-option value="all">All Types</ion-select-option>
+            <ion-select-option *ngFor="let type of resourceTypes" [value]="type">
+              {{ type | titlecase }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Resources List -->
+    <div *ngIf="filteredResources$ | async as resources">
+      <ion-card *ngIf="resources.length === 0" class="no-resources">
+        <ion-card-content>
+          <ion-icon name="layers-outline" color="medium"></ion-icon>
+          <p>No resources found</p>
+          <ion-button routerLink="/providers" fill="outline" size="small">
+            Connect a Provider
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card *ngFor="let resource of resources" class="resource-card" (click)="viewResourceDetails(resource)">
+        <ion-card-header>
+          <div class="resource-header">
+            <div class="resource-title">
+              <ion-icon [name]="getTypeIcon(resource.type)"></ion-icon>
+              <ion-card-title>{{ resource.name }}</ion-card-title>
+            </div>
+            <ion-badge [color]="getStatusColor(resource.status)">
+              {{ resource.status }}
+            </ion-badge>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <div class="resource-info">
+            <div class="info-row">
+              <ion-icon [name]="getProviderIcon(resource.provider)"></ion-icon>
+              <span>{{ resource.provider | titlecase }}</span>
+            </div>
+            <div class="info-row">
+              <ion-icon name="pricetag-outline"></ion-icon>
+              <span>{{ resource.type | titlecase }}</span>
+            </div>
+            <div class="info-row" *ngIf="resource.region">
+              <ion-icon name="location-outline"></ion-icon>
+              <span>{{ resource.region }}</span>
+            </div>
+            <div class="info-row" *ngIf="resource.cost">
+              <ion-icon name="cash-outline"></ion-icon>
+              <span>${{ resource.cost.amount }}/{{ resource.cost.period }}</span>
+            </div>
+          </div>
+
+          <div class="resource-tags" *ngIf="resource.tags">
+            <ion-chip *ngFor="let tag of resource.tags | keyvalue" outline="true">
+              <ion-label>{{ tag.key }}: {{ tag.value }}</ion-label>
+            </ion-chip>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

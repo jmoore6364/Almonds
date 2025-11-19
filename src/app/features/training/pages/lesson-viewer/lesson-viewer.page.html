@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/training/' + moduleId"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Lesson</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="lesson-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Lesson Content</ion-card-title>
+        <ion-card-subtitle>Lesson ID: {{ lessonId }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Lesson content would be displayed here based on the lesson type and content.</p>
+        <p>This is a placeholder for the actual lesson implementation.</p>
+
+        <ion-button expand="block" (click)="completeLesson()">
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          Mark as Complete
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

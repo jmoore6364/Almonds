@@ -1,0 +1,83 @@
+<ion-content class="ion-padding">
+  <div class="login-container">
+    <div class="logo-section">
+      <ion-icon name="layers" color="primary"></ion-icon>
+      <h1>Almonds</h1>
+      <p>Resource Manager</p>
+    </div>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Welcome Back</ion-card-title>
+        <ion-card-subtitle>Sign in to manage your resources</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <ion-item lines="none" class="input-item">
+            <ion-label position="floating">Email</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email">
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="email?.invalid && email?.touched">
+            <ion-text color="danger">
+              <small *ngIf="email?.errors?.['required']">Email is required</small>
+              <small *ngIf="email?.errors?.['email']">Please enter a valid email</small>
+            </ion-text>
+          </div>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="floating">Password</ion-label>
+            <ion-input
+              type="password"
+              formControlName="password"
+              placeholder="Enter your password">
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="password?.invalid && password?.touched">
+            <ion-text color="danger">
+              <small *ngIf="password?.errors?.['required']">Password is required</small>
+              <small *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</small>
+            </ion-text>
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage">
+            <ion-text color="danger">
+              <p>{{ errorMessage }}</p>
+            </ion-text>
+          </div>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="loginForm.invalid || isLoading"
+            class="login-button">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <span *ngIf="!isLoading">Sign In</span>
+          </ion-button>
+        </form>
+
+        <div class="demo-credentials">
+          <ion-text color="medium">
+            <p><small>Demo: Use any email and password (min 6 chars)</small></p>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="features-section">
+      <ion-text color="medium">
+        <h3>Manage All Your Cloud Resources</h3>
+        <ul>
+          <li>AWS, Azure, Railway, Supabase and more</li>
+          <li>Unified dashboard for all providers</li>
+          <li>Training modules for new developers</li>
+          <li>Cost tracking and optimization</li>
+        </ul>
+      </ion-text>
+    </div>
+  </div>
+</ion-content>

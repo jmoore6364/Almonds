@@ -1,0 +1,80 @@
+.detail-container {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+
+  ion-card-title {
+    flex: 1;
+    margin-right: 12px;
+  }
+}
+
+.stats-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 20px;
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 20px;
+      color: var(--ion-color-primary);
+    }
+
+    span {
+      color: var(--ion-color-medium-shade);
+      font-size: 14px;
+    }
+  }
+}
+
+.tags-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  ion-chip {
+    margin: 0;
+  }
+}
+
+.lesson-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--ion-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+
+  p {
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-list {
+  padding: 0;
+}

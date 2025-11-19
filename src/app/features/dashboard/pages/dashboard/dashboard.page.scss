@@ -1,0 +1,78 @@
+.dashboard-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  margin: 0;
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    ion-icon {
+      font-size: 48px;
+    }
+
+    .stat-info {
+      h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: bold;
+      }
+
+      p {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--ion-color-medium);
+  padding: 20px;
+  font-style: italic;
+}
+
+ion-list {
+  padding: 0;
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,140 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Resource Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="resource$ | async as resource; else loading">
+  <div class="detail-container">
+    <!-- Main Info Card -->
+    <ion-card>
+      <ion-card-header>
+        <div class="header-content">
+          <ion-card-title>{{ resource.name }}</ion-card-title>
+          <ion-badge [color]="resource.status === 'active' ? 'success' : 'medium'">
+            {{ resource.status }}
+          </ion-badge>
+        </div>
+        <ion-card-subtitle>{{ resource.id }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h3>Provider</h3>
+              <p>{{ resource.provider | titlecase }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Type</h3>
+              <p>{{ resource.type | titlecase }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="resource.region">
+            <ion-label>
+              <h3>Region</h3>
+              <p>{{ resource.region }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Created</h3>
+              <p>{{ resource.createdAt | date:'medium' }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Last Updated</h3>
+              <p>{{ resource.updatedAt | date:'medium' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Cost Info -->
+    <ion-card *ngIf="resource.cost">
+      <ion-card-header>
+        <ion-card-title>Cost Information</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="cost-display">
+          <h2>${{ resource.cost.amount }}</h2>
+          <p>per {{ resource.cost.period }}</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Metadata -->
+    <ion-card *ngIf="resource.metadata">
+      <ion-card-header>
+        <ion-card-title>Metadata</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let entry of getMetadataEntries(resource.metadata)">
+            <ion-label>
+              <h3>{{ entry.key }}</h3>
+              <p>{{ entry.value }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Tags -->
+    <ion-card *ngIf="resource.tags">
+      <ion-card-header>
+        <ion-card-title>Tags</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="tags-container">
+          <ion-chip *ngFor="let entry of getTagEntries(resource.tags)" color="primary" outline="true">
+            <ion-label>{{ entry.key }}: {{ entry.value }}</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Actions -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Actions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="action-buttons">
+          <ion-button expand="block" fill="outline">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit Resource
+          </ion-button>
+          <ion-button expand="block" fill="outline" color="warning">
+            <ion-icon name="pause-outline" slot="start"></ion-icon>
+            Stop Resource
+          </ion-button>
+          <ion-button expand="block" fill="outline" color="danger">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Delete Resource
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ng-template #loading>
+  <ion-content>
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading resource details...</p>
+    </div>
+  </ion-content>
+</ng-template>

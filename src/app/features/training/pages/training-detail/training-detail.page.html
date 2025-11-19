@@ -1,0 +1,92 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/training"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Module Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="module$ | async as module; else loading">
+  <div class="detail-container">
+    <ion-card class="module-info-card">
+      <ion-card-header>
+        <div class="header-content">
+          <ion-card-title>{{ module.title }}</ion-card-title>
+          <ion-badge [color]="module.difficulty === 'beginner' ? 'success' : module.difficulty === 'intermediate' ? 'warning' : 'danger'">
+            {{ module.difficulty }}
+          </ion-badge>
+        </div>
+        <ion-card-subtitle>{{ module.description }}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="stats-row">
+          <div class="stat">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ module.estimatedMinutes }} minutes</span>
+          </div>
+          <div class="stat">
+            <ion-icon name="book-outline"></ion-icon>
+            <span>{{ module.lessons.length }} lessons</span>
+          </div>
+        </div>
+
+        <div class="tags-section" *ngIf="module.tags.length > 0">
+          <ion-chip *ngFor="let tag of module.tags" color="primary" outline="true">
+            <ion-label>{{ tag }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <ion-button expand="block" (click)="startModule()">
+          <ion-icon name="play-outline" slot="start"></ion-icon>
+          Start Module
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="module.prerequisites && module.prerequisites.length > 0">
+      <ion-card-header>
+        <ion-card-title>Prerequisites</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let prereq of module.prerequisites">
+            <ion-icon name="checkmark-circle-outline" slot="start" color="success"></ion-icon>
+            <ion-label>{{ prereq }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Lessons</ion-card-title>
+        <ion-card-subtitle>{{ module.lessons.length }} lessons in this module</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let lesson of module.lessons; let i = index" (click)="viewLesson(lesson)" button>
+            <div slot="start" class="lesson-number">
+              {{ i + 1 }}
+            </div>
+            <ion-label>
+              <h3>{{ lesson.title }}</h3>
+              <p>{{ lesson.type | titlecase }}</p>
+            </ion-label>
+            <ion-icon [name]="getLessonIcon(lesson.type)" slot="end"></ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ng-template #loading>
+  <ion-content>
+    <div class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading module...</p>
+    </div>
+  </ion-content>
+</ng-template>
