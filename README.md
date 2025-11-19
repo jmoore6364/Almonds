@@ -77,6 +77,38 @@ A unified web/mobile platform built with Ionic and Angular for managing cloud re
   - Historical budget trend analysis
 - **Export Capabilities**: Download reports in multiple formats (CSV, PDF, JSON)
 
+### Automation & Workflows
+- **Workflow Automation Engine**: Create and manage automated workflows
+  - Multiple trigger types: schedule, event, webhook, manual, alert, metric threshold
+  - Flexible workflow actions: start/stop/restart/scale resources, backups, notifications, webhooks, scripts
+  - Workflow execution tracking and history
+  - Enable/disable workflows dynamically
+- **Scheduled Tasks**: Automate recurring operations
+  - Cron-based scheduling with multiple schedule types
+  - Task execution tracking with next run calculation
+  - Support for daily, weekly, monthly, and custom schedules
+- **Auto-Scaling Policies**: Automatic resource scaling
+  - Scale-up and scale-down rules based on metrics
+  - Min/max instance limits with cooldown periods
+  - Multiple scaling rules per policy
+  - Scaling event history and tracking
+
+### Audit & Compliance
+- **Comprehensive Audit Logging**: Track all user actions and system events
+  - User activity logging with timestamps, IP addresses, and user agents
+  - Resource change tracking with before/after states
+  - Success/failure status tracking
+  - Audit log filtering, search, and export (CSV, JSON, PDF)
+- **Compliance Reporting**: Multi-framework compliance tracking
+  - Support for SOC 2, HIPAA, GDPR, ISO 27001, PCI DSS
+  - Automated compliance report generation
+  - Compliance findings with severity levels and remediation guidance
+  - Compliance score calculations and trends
+  - Control tracking and evidence management
+- **Data Retention Policies**: Automated data lifecycle management
+  - Configurable retention periods
+  - Data type-specific policies
+
 ### Security & Authentication
 - Secure credential storage with encryption
 - Multi-level role-based access control (RBAC)
@@ -146,6 +178,9 @@ src/
 │       ├── training/             # Training modules
 │       ├── organization/         # Multi-tenancy & team management
 │       ├── analytics/            # Cost analytics & reporting
+│       ├── alerts/               # Alerts & monitoring
+│       ├── automation/           # Workflow automation
+│       ├── audit/                # Audit logs & compliance
 │       └── auth/                 # Authentication
 │
 ├── theme/                         # Ionic theming
@@ -379,6 +414,134 @@ npm run build
    - Receive alerts when approaching limits (warning, critical)
    - View budget consumption percentage
    - Monitor spending trends to stay within budget
+
+### Alerts & Monitoring
+
+#### Creating Alerts
+
+1. **Access Alerts Management**
+   - Navigate to Alerts → Management
+   - Click "Add" to create a new alert
+   - Configure alert conditions and actions
+
+2. **Alert Types**
+   - Cost alerts: Monitor spending thresholds
+   - Resource status alerts: Track resource availability
+   - Performance alerts: Monitor response times and metrics
+   - Security alerts: Detect security-related events
+   - Health alerts: Monitor service health
+   - Custom alerts: Define custom conditions
+
+3. **Alert Actions**
+   - Email notifications
+   - SMS notifications
+   - Webhook calls
+   - Slack integration
+   - Push notifications
+   - In-app notifications
+
+#### Health Monitoring
+
+1. **Create Health Checks**
+   - Navigate to Alerts → Health Monitoring
+   - Select resource to monitor
+   - Configure check type (HTTP, HTTPS, TCP, ping, database, API)
+   - Set check interval and timeout
+   - Enable the health check
+
+2. **Monitor Service Health**
+   - View overall service health dashboard
+   - Track uptime percentages (24h, 7d, 30d)
+   - Monitor active incidents
+   - View health check history
+
+### Workflow Automation
+
+#### Creating Workflows
+
+1. **Access Workflow Management**
+   - Navigate to Automation → Workflows
+   - Create new workflow with trigger and actions
+
+2. **Workflow Triggers**
+   - Schedule-based (cron expressions)
+   - Event-based (resource events)
+   - Webhook triggers
+   - Manual execution
+   - Alert-based triggers
+   - Metric threshold triggers
+
+3. **Workflow Actions**
+   - Start/stop/restart resources
+   - Scale resources
+   - Create backups
+   - Send notifications
+   - Execute webhooks
+   - Run custom scripts
+   - Create/delete snapshots
+   - Update resource tags
+
+#### Scheduled Tasks
+
+1. **Create Scheduled Tasks**
+   - Navigate to Automation → Scheduled Tasks
+   - Define task schedule (daily, weekly, monthly, cron)
+   - Configure task action
+   - Select target resources
+   - Enable the scheduled task
+
+2. **Monitor Task Execution**
+   - View next run time
+   - Track execution count
+   - Review execution history
+
+#### Auto-Scaling
+
+1. **Create Auto-Scaling Policies**
+   - Navigate to Automation → Auto-Scaling
+   - Define scale-up rules (e.g., CPU > 75%)
+   - Define scale-down rules (e.g., CPU < 30%)
+   - Set min/max instance limits
+   - Configure cooldown period
+
+2. **Monitor Scaling Events**
+   - View scaling event history
+   - Track current instance counts
+   - Review scaling decisions
+
+### Audit & Compliance
+
+#### Viewing Audit Logs
+
+1. **Access Audit Logs**
+   - Navigate to Audit → Logs
+   - View all user actions and system events
+   - Filter by date, user, action type, or resource
+   - Export logs in CSV, JSON, or PDF format
+
+2. **Audit Log Information**
+   - User who performed the action
+   - Action type (create, update, delete, login, etc.)
+   - Resource affected
+   - Timestamp and IP address
+   - Before/after states for changes
+   - Success or failure status
+
+#### Compliance Reporting
+
+1. **Generate Compliance Reports**
+   - Navigate to Audit → Compliance
+   - Click "Generate Report"
+   - Select compliance framework (SOC 2, HIPAA, GDPR, ISO 27001, PCI DSS)
+   - Wait for report generation
+
+2. **Review Compliance Reports**
+   - View compliance score
+   - Review findings by severity
+   - Check control status
+   - Review recommendations
+   - Access evidence and documentation
+   - Export compliance reports
 
 ### Connecting Providers
 
