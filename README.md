@@ -109,6 +109,27 @@ A unified web/mobile platform built with Ionic and Angular for managing cloud re
   - Configurable retention periods
   - Data type-specific policies
 
+### Advanced Integrations & API
+- **API Access Layer**: Programmatic access to all platform features
+  - Secure API key generation with scope-based permissions
+  - Rate limiting (requests per minute/hour/day, burst limits)
+  - Usage tracking and analytics (requests, bandwidth, error rates)
+  - IP whitelisting and key expiration
+  - Multiple API scopes for granular access control
+- **Webhook Management**: Real-time event notifications
+  - Event subscriptions (resources, alerts, workflows, scaling, compliance, budgets)
+  - Webhook testing with sample payloads
+  - Retry logic with configurable backoff
+  - Delivery statistics and health monitoring
+  - Custom headers and webhook secrets
+- **Infrastructure as Code (IaC)**: Deploy infrastructure from templates
+  - Template library (Terraform, CloudFormation, Pulumi, Ansible, Custom)
+  - Template variables with validation rules
+  - One-click deployment from templates
+  - Deployment tracking and monitoring
+  - Public and private template sharing
+  - Template versioning and categorization
+
 ### Security & Authentication
 - Secure credential storage with encryption
 - Multi-level role-based access control (RBAC)
@@ -181,6 +202,7 @@ src/
 │       ├── alerts/               # Alerts & monitoring
 │       ├── automation/           # Workflow automation
 │       ├── audit/                # Audit logs & compliance
+│       ├── integrations/         # API keys, webhooks, IaC templates
 │       └── auth/                 # Authentication
 │
 ├── theme/                         # Ionic theming
@@ -822,3 +844,93 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Made with ❤️ by the Almonds team
+
+### Integrations & API
+
+#### Managing API Keys
+
+1. **Create API Key**
+   - Navigate to Integrations → API Keys
+   - Click "Add" to create new key
+   - Enter key name and description
+   - Select API scopes (read:resources, write:resources, etc.)
+   - Configure rate limits
+   - Set optional expiration date
+   - Copy the generated key (shown only once!)
+
+2. **API Key Security**
+   - Keys are shown only once after creation
+   - Store keys securely in environment variables
+   - Use IP whitelisting for additional security
+   - Revoke compromised keys immediately
+   - Set expiration dates for temporary access
+
+3. **Monitor API Usage**
+   - View total requests and bandwidth usage
+   - Track error rates
+   - Monitor last usage timestamp
+   - Review rate limit consumption
+
+#### Setting Up Webhooks
+
+1. **Create Webhook**
+   - Navigate to Integrations → Webhooks
+   - Enter webhook name and URL
+   - Select events to subscribe to:
+     - resource.created/updated/deleted
+     - alert.triggered
+     - workflow.started/completed/failed
+     - health_check.failed
+     - scaling.event
+     - compliance.report_generated
+     - budget.threshold_exceeded
+   - Configure custom headers if needed
+
+2. **Test Webhooks**
+   - Use the "Test" button to send sample payload
+   - Verify webhook endpoint responds correctly
+   - Check response time and status code
+
+3. **Monitor Webhook Health**
+   - View delivery statistics
+   - Track success and failure rates
+   - Monitor average response time
+   - Review consecutive failures
+   - Enable/disable webhooks as needed
+
+#### Working with IaC Templates
+
+1. **Browse Templates**
+   - Navigate to Integrations → IaC Templates
+   - Filter by type (Terraform, CloudFormation, Pulumi, Ansible)
+   - View template details, variables, and outputs
+   - Check deployment count and ratings
+
+2. **Deploy from Template**
+   - Select template to deploy
+   - Click "Deploy" button
+   - Enter deployment name
+   - Provide required variable values
+   - Monitor deployment progress
+   - View deployment logs
+
+3. **Create Custom Templates**
+   - Create new template with your IaC code
+   - Define template variables with validation rules
+   - Specify template outputs
+   - Add tags and category
+   - Publish for team use or keep private
+   - Version your templates
+
+4. **Template Variables**
+   - Define required and optional variables
+   - Set default values
+   - Add validation rules (min, max, allowed values, regex patterns)
+   - Include descriptions for documentation
+
+5. **Deployment Management**
+   - Track all deployments
+   - View deployment status and duration
+   - Review deployed resources
+   - Access deployment logs
+   - Monitor deployment health
