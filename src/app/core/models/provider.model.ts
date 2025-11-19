@@ -21,6 +21,7 @@ export interface ProviderCredentials {
 
 export interface ProviderConfig {
   id: string;
+  organizationId: string;
   provider: CloudProvider;
   name: string;
   displayName: string;
@@ -30,6 +31,7 @@ export interface ProviderConfig {
   endpoint?: string;
   connectedAt?: Date;
   lastSyncedAt?: Date;
+  connectedBy?: string;
   metadata?: Record<string, any>;
 }
 

@@ -1,18 +1,43 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject, of, combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { Resource, ResourceGroup, CloudProvider } from '../models/resource.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ResourceService {
-  private resourcesSubject = new BehaviorSubject<Resource[]>([]);
-  public resources$ = this.resourcesSubject.asObservable();
+  private allResourcesSubject = new BehaviorSubject<Resource[]>([]);
+  private allResourceGroupsSubject = new BehaviorSubject<ResourceGroup[]>([]);
 
-  private resourceGroupsSubject = new BehaviorSubject<ResourceGroup[]>([]);
-  public resourceGroups$ = this.resourceGroupsSubject.asObservable();
+  // Tenant-filtered observables
+  public resources$: Observable<Resource[]>;
+  public resourceGroups$: Observable<ResourceGroup[]>;
 
-  constructor() {}
+  constructor(private authService: AuthService) {
+    // Filter resources by current organization
+    this.resources$ = combineLatest([
+      this.allResourcesSubject.asObservable(),
+      this.authService.getCurrentOrganization()
+    ]).pipe(
+      map(([resources, currentOrg]) => {
+        if (!currentOrg) return [];
+        return resources.filter(r => r.organizationId === currentOrg.id);
+      })
+    );
+
+    // Filter resource groups by current organization
+    this.resourceGroups$ = combineLatest([
+      this.allResourceGroupsSubject.asObservable(),
+      this.authService.getCurrentOrganization()
+    ]).pipe(
+      map(([groups, currentOrg]) => {
+        if (!currentOrg) return [];
+        return groups.filter(g => g.organizationId === currentOrg.id);
+      })
+    );
+  }
 
   /**
    * Get all resources across all providers
@@ -22,45 +47,71 @@ export class ResourceService {
   }
 
   /**
-   * Get resources by provider
+   * Get resources by provider (tenant-aware)
    */
   getResourcesByProvider(provider: CloudProvider): Observable<Resource[]> {
-    return of(this.resourcesSubject.value.filter(r => r.provider === provider));
+    return this.resources$.pipe(
+      map(resources => resources.filter(r => r.provider === provider))
+    );
   }
 
   /**
-   * Get resource by ID
+   * Get resource by ID (tenant-aware)
    */
   getResourceById(id: string): Observable<Resource | undefined> {
-    return of(this.resourcesSubject.value.find(r => r.id === id));
+    return this.resources$.pipe(
+      map(resources => resources.find(r => r.id === id))
+    );
   }
 
   /**
    * Add a new resource
    */
-  addResource(resource: Resource): void {
-    const current = this.resourcesSubject.value;
-    this.resourcesSubject.next([...current, resource]);
+  addResource(resource: Resource): Observable<Resource> {
+    return this.authService.getCurrentOrganization().pipe(
+      map(currentOrg => {
+        if (!currentOrg) {
+          throw new Error('No organization selected');
+        }
+
+        const newResource = {
+          ...resource,
+          organizationId: currentOrg.id
+        };
+
+        const current = this.allResourcesSubject.value;
+        this.allResourcesSubject.next([...current, newResource]);
+
+        return newResource;
+      })
+    );
   }
 
   /**
    * Update resource
    */
-  updateResource(id: string, updates: Partial<Resource>): void {
-    const current = this.resourcesSubject.value;
+  updateResource(id: string, updates: Partial<Resource>): Observable<Resource | undefined> {
+    const current = this.allResourcesSubject.value;
     const index = current.findIndex(r => r.id === id);
-    if (index !== -1) {
-      current[index] = { ...current[index], ...updates, updatedAt: new Date() };
-      this.resourcesSubject.next([...current]);
+
+    if (index === -1) {
+      return of(undefined);
     }
+
+    const updated = { ...current[index], ...updates, updatedAt: new Date() };
+    current[index] = updated;
+    this.allResourcesSubject.next([...current]);
+
+    return of(updated);
   }
 
   /**
    * Delete resource
    */
-  deleteResource(id: string): void {
-    const current = this.resourcesSubject.value.filter(r => r.id !== id);
-    this.resourcesSubject.next(current);
+  deleteResource(id: string): Observable<boolean> {
+    const current = this.allResourcesSubject.value.filter(r => r.id !== id);
+    this.allResourcesSubject.next(current);
+    return of(true);
   }
 
   /**

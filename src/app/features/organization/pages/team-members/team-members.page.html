@@ -1,0 +1,156 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Team Members</ion-title>
+    <ion-buttons slot="end" *ngIf="canManageMembers()">
+      <ion-button (click)="toggleInviteForm()">
+        <ion-icon name="person-add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="members-container">
+    <!-- Invite Form -->
+    <ion-card *ngIf="showInviteForm" class="invite-card">
+      <ion-card-header>
+        <ion-card-title>Invite Team Member</ion-card-title>
+        <ion-card-subtitle>Send an invitation to join your organization</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="inviteForm" (ngSubmit)="inviteMember()">
+          <ion-item lines="none">
+            <ion-label position="floating">Email Address *</ion-label>
+            <ion-input type="email" formControlName="email"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label position="floating">Role *</ion-label>
+            <ion-select formControlName="role">
+              <ion-select-option *ngFor="let role of roles" [value]="role.value">
+                {{ role.label }} - {{ role.description }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item lines="none">
+            <ion-label position="floating">Personal Message (Optional)</ion-label>
+            <ion-textarea
+              formControlName="message"
+              rows="3"
+              placeholder="Welcome to our team!">
+            </ion-textarea>
+          </ion-item>
+
+          <div class="form-actions">
+            <ion-button fill="outline" (click)="toggleInviteForm()" [disabled]="isInviting">
+              Cancel
+            </ion-button>
+            <ion-button type="submit" [disabled]="inviteForm.invalid || isInviting">
+              <ion-spinner *ngIf="isInviting" name="crescent"></ion-spinner>
+              <span *ngIf="!isInviting">Send Invitation</span>
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Pending Invitations -->
+    <ion-card *ngIf="invitations$ | async as invitations">
+      <ion-card-header *ngIf="invitations.length > 0">
+        <ion-card-title>Pending Invitations</ion-card-title>
+        <ion-card-subtitle>{{ invitations.length }} invitation(s) pending</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content *ngIf="invitations.length > 0">
+        <ion-list>
+          <ion-item *ngFor="let invitation of invitations">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ invitation.email }}</h3>
+              <p>{{ invitation.role | titlecase }} - Invited by {{ invitation.invitedByName }}</p>
+              <p>Expires {{ invitation.expiresAt | date:'short' }}</p>
+            </ion-label>
+            <ion-button
+              *ngIf="canManageMembers()"
+              fill="clear"
+              color="danger"
+              slot="end"
+              (click)="cancelInvitation(invitation)">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Team Members List -->
+    <ion-card *ngIf="members$ | async as members">
+      <ion-card-header>
+        <ion-card-title>Team Members</ion-card-title>
+        <ion-card-subtitle>{{ members.length }} member(s)</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let member of members">
+            <ion-avatar slot="start">
+              <img *ngIf="member.avatar" [src]="member.avatar" />
+              <ion-icon *ngIf="!member.avatar" name="person-circle"></ion-icon>
+            </ion-avatar>
+
+            <ion-label>
+              <h3>{{ member.name }}</h3>
+              <p>{{ member.email }}</p>
+              <p *ngIf="member.lastActiveAt">
+                Last active {{ member.lastActiveAt | date:'short' }}
+              </p>
+            </ion-label>
+
+            <ion-badge [color]="getRoleColor(member.role)" slot="end">
+              {{ member.role | titlecase }}
+            </ion-badge>
+
+            <ion-button
+              *ngIf="canManageMembers() && member.role !== 'owner'"
+              fill="clear"
+              slot="end"
+              (click)="updateMemberRole(member)">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button
+              *ngIf="canManageMembers() && member.role !== 'owner'"
+              fill="clear"
+              color="danger"
+              slot="end"
+              (click)="removeMember(member)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Info Card -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <h4>
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Member Roles
+        </h4>
+        <ul>
+          <li><strong>Owner:</strong> Full control including billing and deletion</li>
+          <li><strong>Admin:</strong> Manage resources, members, and settings</li>
+          <li><strong>Developer:</strong> Manage resources and providers</li>
+          <li><strong>Viewer:</strong> Read-only access to resources</li>
+          <li><strong>Billing:</strong> Manage billing and payment methods</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

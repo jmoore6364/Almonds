@@ -1,0 +1,45 @@
+<div class="org-switcher">
+  <div *ngIf="currentOrganization$ | async as currentOrg" class="current-org">
+    <ion-icon name="business-outline"></ion-icon>
+    <div class="org-info">
+      <h3>{{ currentOrg.name }}</h3>
+      <p>{{ currentOrg.plan | titlecase }} Plan</p>
+    </div>
+  </div>
+
+  <ion-list class="org-list">
+    <ion-list-header>
+      <ion-label>Switch Organization</ion-label>
+    </ion-list-header>
+
+    <ion-item
+      *ngFor="let org of userOrganizations"
+      button
+      (click)="switchOrganization(org.organizationId)"
+      [class.active]="(currentOrganization$ | async)?.id === org.organizationId">
+      <ion-icon name="business" slot="start"></ion-icon>
+      <ion-label>
+        <h3>{{ org.organizationName }}</h3>
+        <p>{{ org.role | titlecase }}</p>
+      </ion-label>
+      <ion-icon
+        *ngIf="(currentOrganization$ | async)?.id === org.organizationId"
+        name="checkmark-circle"
+        color="primary"
+        slot="end">
+      </ion-icon>
+    </ion-item>
+  </ion-list>
+
+  <div class="org-actions">
+    <ion-button expand="block" fill="outline" (click)="createOrganization()">
+      <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+      Create Organization
+    </ion-button>
+
+    <ion-button expand="block" fill="clear" (click)="manageOrganization()">
+      <ion-icon name="settings-outline" slot="start"></ion-icon>
+      Manage Organization
+    </ion-button>
+  </div>
+</div>

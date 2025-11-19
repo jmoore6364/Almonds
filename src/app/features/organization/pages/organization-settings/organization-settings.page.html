@@ -1,0 +1,234 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Organization Settings</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/organization/team">
+        <ion-icon name="people-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="organization$ | async as organization">
+  <div class="settings-container">
+    <!-- Organization Stats -->
+    <ion-card *ngIf="stats$ | async as stats">
+      <ion-card-header>
+        <ion-card-title>Organization Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <ion-icon name="people-outline" color="primary"></ion-icon>
+            <div>
+              <h4>{{ stats.totalMembers }}</h4>
+              <p>Members</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="layers-outline" color="secondary"></ion-icon>
+            <div>
+              <h4>{{ stats.totalResources }}</h4>
+              <p>Resources</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="cash-outline" color="warning"></ion-icon>
+            <div>
+              <h4>${{ stats.totalCost.toFixed(2) }}</h4>
+              <p>Monthly Cost</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <ion-icon name="trending-up-outline" color="success"></ion-icon>
+            <div>
+              <h4>{{ stats.monthlyGrowth.toFixed(1) }}%</h4>
+              <p>Growth</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Basic Information -->
+    <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Basic Information</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="floating">Organization Name *</ion-label>
+            <ion-input type="text" formControlName="name"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Description</ion-label>
+            <ion-textarea formControlName="description" rows="3"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Website</ion-label>
+            <ion-input type="url" formControlName="website" placeholder="https://example.com"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Plan</ion-label>
+            <ion-badge [color]="organization.plan === 'enterprise' ? 'success' : 'primary'">
+              {{ organization.plan | titlecase }}
+            </ion-badge>
+          </ion-item>
+
+          <ion-item button routerLink="/organization/billing">
+            <ion-label>
+              <h3>Billing & Subscription</h3>
+              <p>Manage your plan and billing</p>
+            </ion-label>
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- General Settings -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>General Settings</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="floating">Default Region</ion-label>
+            <ion-select formControlName="defaultRegion">
+              <ion-select-option value="">None</ion-select-option>
+              <ion-select-option value="us-east-1">US East (N. Virginia)</ion-select-option>
+              <ion-select-option value="us-west-2">US West (Oregon)</ion-select-option>
+              <ion-select-option value="eu-west-1">EU (Ireland)</ion-select-option>
+              <ion-select-option value="ap-southeast-1">Asia Pacific (Singapore)</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Data Retention</h3>
+              <p>Keep logs and history for {{ settingsForm.get('retentionDays')?.value }} days</p>
+            </ion-label>
+            <ion-range
+              formControlName="retentionDays"
+              min="7"
+              max="365"
+              step="1"
+              snaps="true"
+              ticks="true">
+              <ion-label slot="start">7d</ion-label>
+              <ion-label slot="end">365d</ion-label>
+            </ion-range>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Security Settings -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Security</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label>
+              <h3>Require Multi-Factor Authentication</h3>
+              <p>All members must enable MFA</p>
+            </ion-label>
+            <ion-toggle formControlName="requireMFA"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Allow Public Resources</h3>
+              <p>Resources can be made publicly accessible</p>
+            </ion-label>
+            <ion-toggle formControlName="allowPublicResources"></ion-toggle>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Notification Settings -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Notifications</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label>
+              <h3>Email Notifications</h3>
+            </ion-label>
+            <ion-toggle formControlName="emailNotifications"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Resource Alerts</h3>
+              <p>Get notified about resource status changes</p>
+            </ion-label>
+            <ion-toggle formControlName="resourceAlerts"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Cost Alerts</h3>
+              <p>Get notified about budget thresholds</p>
+            </ion-label>
+            <ion-toggle formControlName="costAlerts"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Security Alerts</h3>
+              <p>Get notified about security issues</p>
+            </ion-label>
+            <ion-toggle formControlName="securityAlerts"></ion-toggle>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Weekly Reports</h3>
+              <p>Receive weekly usage summaries</p>
+            </ion-label>
+            <ion-toggle formControlName="weeklyReports"></ion-toggle>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Save Button -->
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="settingsForm.invalid || isSaving"
+        class="save-button">
+        <ion-spinner *ngIf="isSaving" name="crescent"></ion-spinner>
+        <span *ngIf="!isSaving">Save Settings</span>
+      </ion-button>
+    </form>
+
+    <!-- Danger Zone -->
+    <ion-card class="danger-zone">
+      <ion-card-header>
+        <ion-card-title>Danger Zone</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          (click)="deleteOrganization()">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          Delete Organization
+        </ion-button>
+        <p class="warning-text">
+          Once you delete an organization, there is no going back. All resources,
+          members, and data will be permanently deleted.
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

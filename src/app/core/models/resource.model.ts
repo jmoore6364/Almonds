@@ -29,6 +29,7 @@ export enum CloudProvider {
 
 export interface Resource {
   id: string;
+  organizationId: string;
   name: string;
   type: ResourceType;
   provider: CloudProvider;
@@ -38,6 +39,7 @@ export interface Resource {
   metadata?: ResourceMetadata;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: string;
   cost?: ResourceCost;
 }
 
@@ -57,9 +59,13 @@ export interface ResourceCost {
 
 export interface ResourceGroup {
   id: string;
+  organizationId: string;
   name: string;
   description?: string;
   resources: Resource[];
   provider: CloudProvider;
   tags?: Record<string, string>;
+  createdBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

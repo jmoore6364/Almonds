@@ -37,11 +37,31 @@ A unified web/mobile platform built with Ionic and Angular for managing cloud re
   - Resource Management Best Practices
 - Interactive lessons and quizzes
 
+### Multi-Tenancy & Organizations
+- **Full Multi-Tenant Architecture**: Complete organization isolation for enterprise use
+- **Organization Management**:
+  - Create and manage multiple organizations
+  - Switch between organizations seamlessly
+  - Organization-specific resource isolation
+  - Dedicated settings and preferences per organization
+- **Team Collaboration**:
+  - Invite team members via email
+  - Granular role-based permissions (Owner, Admin, Developer, Viewer, Billing)
+  - Member management and access control
+  - Pending invitation tracking
+- **Flexible Plans**: Support for Free, Starter, Professional, and Enterprise tiers
+- **Isolated Resources**: All resources, providers, and settings are organization-scoped
+- **Organization Dashboard**: Stats, member count, and cost tracking per organization
+
 ### Security & Authentication
 - Secure credential storage with encryption
-- Role-based access control (Admin, Developer, Viewer, Trainee)
+- Multi-level role-based access control (RBAC)
+  - User roles: Admin, Developer, Viewer, Trainee
+  - Organization roles: Owner, Admin, Developer, Viewer, Billing
 - OAuth integration support
 - Session management
+- MFA enforcement options per organization
+- Secure organization switching with context preservation
 
 ### Cross-Platform
 - **Web**: Responsive design for desktop and tablet browsers
@@ -196,6 +216,84 @@ npm run build
    - Access "Training Modules" from the dashboard
    - Start with beginner modules
    - Track your progress
+
+### Multi-Tenancy & Organization Management
+
+#### Creating an Organization
+
+1. **Create Your First Organization**
+   - After login, you can create a new organization
+   - Provide organization name, slug (URL-friendly identifier), and description
+   - Select a plan (Free, Starter, Professional, Enterprise)
+   - The slug must be unique and URL-safe (lowercase, numbers, hyphens)
+
+2. **Organization Dashboard**
+   - View organization statistics (members, resources, costs)
+   - Access organization settings
+   - Manage team members
+
+#### Managing Team Members
+
+1. **Invite Members**
+   - Navigate to Organization → Team Members
+   - Click "Invite" and enter the member's email
+   - Select their role:
+     - **Owner**: Full control including billing and deletion
+     - **Admin**: Manage resources, members, and settings
+     - **Developer**: Manage resources and providers
+     - **Viewer**: Read-only access
+     - **Billing**: Manage billing and payment methods
+   - Add optional personal message
+   - Send invitation
+
+2. **Manage Existing Members**
+   - Update member roles
+   - Remove members from organization
+   - View member activity and last login
+
+3. **Invitation Management**
+   - View pending invitations
+   - Resend or cancel invitations
+   - Invitations expire after 7 days
+
+#### Switching Organizations
+
+1. **Access Organization Switcher**
+   - Click on organization name in header/sidebar
+   - View list of all organizations you're a member of
+
+2. **Switch Context**
+   - Select the organization you want to work with
+   - All resources, providers, and settings update automatically
+   - Current organization is persisted across sessions
+
+3. **Create Additional Organizations**
+   - Users can be members of multiple organizations
+   - Each organization has completely isolated resources
+   - Switch seamlessly between different contexts
+
+#### Organization Settings
+
+1. **Basic Information**
+   - Update organization name, description, and website
+   - View and upgrade plan
+   - Access billing and subscription management
+
+2. **Security Settings**
+   - Require MFA for all organization members
+   - Control public resource access
+   - Set data retention policies (7-365 days)
+
+3. **Notification Preferences**
+   - Configure email notifications
+   - Set up resource alerts
+   - Enable cost alerts and budget thresholds
+   - Configure security alerts
+   - Opt-in to weekly usage reports
+
+4. **Danger Zone**
+   - Delete organization (requires confirmation)
+   - Permanently removes all resources, members, and data
 
 ### Connecting Providers
 

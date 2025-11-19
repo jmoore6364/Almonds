@@ -1,0 +1,144 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Create Organization</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="create-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>New Organization</ion-card-title>
+        <ion-card-subtitle>Create a new organization to manage your resources</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
+          <!-- Organization Name -->
+          <ion-item lines="none" class="input-item">
+            <ion-label position="floating">Organization Name *</ion-label>
+            <ion-input
+              type="text"
+              formControlName="name"
+              placeholder="Acme Corporation">
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="name?.invalid && name?.touched">
+            <ion-text color="danger">
+              <small *ngIf="name?.errors?.['required']">Organization name is required</small>
+              <small *ngIf="name?.errors?.['minlength']">Name must be at least 3 characters</small>
+            </ion-text>
+          </div>
+
+          <!-- Slug -->
+          <ion-item lines="none" class="input-item">
+            <ion-label position="floating">Slug *</ion-label>
+            <ion-input
+              type="text"
+              formControlName="slug"
+              placeholder="acme-corporation">
+            </ion-input>
+            <ion-icon
+              *ngIf="checkingSlug"
+              name="hourglass-outline"
+              slot="end"
+              color="medium">
+            </ion-icon>
+            <ion-icon
+              *ngIf="!checkingSlug && slug?.valid && slugAvailable"
+              name="checkmark-circle"
+              slot="end"
+              color="success">
+            </ion-icon>
+            <ion-icon
+              *ngIf="!checkingSlug && slug?.valid && !slugAvailable"
+              name="close-circle"
+              slot="end"
+              color="danger">
+            </ion-icon>
+          </ion-item>
+          <div class="helper-text">
+            <ion-text color="medium">
+              <small>URL-friendly identifier (lowercase, numbers, hyphens only)</small>
+            </ion-text>
+          </div>
+          <div class="error-message" *ngIf="slug?.invalid && slug?.touched">
+            <ion-text color="danger">
+              <small *ngIf="slug?.errors?.['required']">Slug is required</small>
+              <small *ngIf="slug?.errors?.['pattern']">Invalid format (use lowercase, numbers, hyphens)</small>
+            </ion-text>
+          </div>
+          <div class="error-message" *ngIf="slug?.valid && !slugAvailable && !checkingSlug">
+            <ion-text color="danger">
+              <small>This slug is already taken</small>
+            </ion-text>
+          </div>
+
+          <!-- Description -->
+          <ion-item lines="none" class="input-item textarea-item">
+            <ion-label position="floating">Description</ion-label>
+            <ion-textarea
+              formControlName="description"
+              rows="3"
+              placeholder="Brief description of your organization">
+            </ion-textarea>
+          </ion-item>
+
+          <!-- Plan Selection -->
+          <div class="section-header">
+            <h3>Select a Plan</h3>
+          </div>
+
+          <ion-radio-group formControlName="plan">
+            <div class="plans-grid">
+              <div *ngFor="let plan of plans" class="plan-card">
+                <ion-item lines="none">
+                  <ion-radio [value]="plan.value" slot="start"></ion-radio>
+                  <ion-label>
+                    <h3>{{ plan.label }}</h3>
+                    <p>{{ plan.description }}</p>
+                  </ion-label>
+                </ion-item>
+              </div>
+            </div>
+          </ion-radio-group>
+
+          <!-- Error Message -->
+          <div class="error-message" *ngIf="errorMessage">
+            <ion-text color="danger">
+              <p>{{ errorMessage }}</p>
+            </ion-text>
+          </div>
+
+          <!-- Submit Button -->
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="createForm.invalid || !slugAvailable || isLoading"
+            class="submit-button">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <span *ngIf="!isLoading">Create Organization</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="info-card">
+      <ion-card-content>
+        <h4>
+          <ion-icon name="information-circle-outline"></ion-icon>
+          About Organizations
+        </h4>
+        <ul>
+          <li>Organizations help you manage resources and team members</li>
+          <li>You can be a member of multiple organizations</li>
+          <li>Each organization has its own resources and billing</li>
+          <li>You can upgrade your plan at any time</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
