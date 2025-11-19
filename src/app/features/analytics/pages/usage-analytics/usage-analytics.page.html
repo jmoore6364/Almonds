@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/analytics"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Usage Analytics</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="usage-container">
+    <ion-card *ngIf="usageAnalytics$ | async as analytics">
+      <ion-card-header>
+        <ion-card-title>Resource Usage Metrics</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h4>Total Resources</h4>
+            <p class="metric-value">{{ analytics.resourceMetrics.totalResources }}</p>
+          </div>
+          <div class="metric-card">
+            <h4>Active</h4>
+            <p class="metric-value success">{{ analytics.resourceMetrics.activeResources }}</p>
+          </div>
+          <div class="metric-card">
+            <h4>Inactive</h4>
+            <p class="metric-value warning">{{ analytics.resourceMetrics.inactiveResources }}</p>
+          </div>
+          <div class="metric-card">
+            <h4>Errors</h4>
+            <p class="metric-value danger">{{ analytics.resourceMetrics.errorResources }}</p>
+          </div>
+        </div>
+
+        <div class="utilization-section">
+          <h3>Overall Utilization</h3>
+          <div class="utilization-display">
+            <div class="gauge">{{ analytics.utilizationMetrics.overall.toFixed(1) }}%</div>
+          </div>
+        </div>
+
+        <div class="performance-section">
+          <h3>Performance Metrics</h3>
+          <ion-list>
+            <ion-item>
+              <ion-label>
+                <h4>Uptime</h4>
+                <p>{{ analytics.performanceMetrics.uptime.toFixed(2) }}%</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <h4>Average Response Time</h4>
+                <p>{{ analytics.performanceMetrics.averageResponseTime }}ms</p>
+              </ion-label>
+            </ion-item>
+            <ion-item>
+              <ion-label>
+                <h4>Error Rate</h4>
+                <p>{{ analytics.performanceMetrics.errorRate }}%</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

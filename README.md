@@ -53,6 +53,30 @@ A unified web/mobile platform built with Ionic and Angular for managing cloud re
 - **Isolated Resources**: All resources, providers, and settings are organization-scoped
 - **Organization Dashboard**: Stats, member count, and cost tracking per organization
 
+### Analytics & Reporting
+- **Cost Analytics Dashboard**: Comprehensive cost tracking and visualization
+  - Total cost overview with trend indicators
+  - Cost breakdown by provider, resource type, and region
+  - Month-over-month and year-over-year comparisons
+  - Cost forecasting for next month, quarter, and year
+- **Usage Analytics**: Monitor resource utilization and performance
+  - Resource usage metrics (total, active, inactive, error states)
+  - Overall utilization percentage with visual gauges
+  - Performance metrics (uptime, response time, error rate)
+- **Cost Optimization Recommendations**: AI-powered cost saving suggestions
+  - Rightsizing recommendations for over/under-provisioned resources
+  - Reserved instance and spot instance opportunities
+  - Unused resource identification
+  - Scheduling suggestions for non-production resources
+  - Priority-based recommendations with potential savings calculations
+  - Action items and affected resource tracking
+- **Budget Alerts**: Proactive cost monitoring
+  - Multiple budget thresholds (warning, critical)
+  - Real-time budget consumption tracking
+  - Alert notifications when thresholds are exceeded
+  - Historical budget trend analysis
+- **Export Capabilities**: Download reports in multiple formats (CSV, PDF, JSON)
+
 ### Security & Authentication
 - Secure credential storage with encryption
 - Multi-level role-based access control (RBAC)
@@ -98,12 +122,16 @@ src/
 │   │   │   ├── resource.model.ts
 │   │   │   ├── provider.model.ts
 │   │   │   ├── user.model.ts
-│   │   │   └── training.model.ts
+│   │   │   ├── training.model.ts
+│   │   │   ├── organization.model.ts
+│   │   │   └── analytics.model.ts
 │   │   └── services/             # Business logic services
 │   │       ├── resource.service.ts
 │   │       ├── provider.service.ts
 │   │       ├── auth.service.ts
 │   │       ├── training.service.ts
+│   │       ├── organization.service.ts
+│   │       ├── analytics.service.ts
 │   │       └── providers/        # Cloud provider integrations
 │   │           ├── base-provider.service.ts
 │   │           ├── aws-provider.service.ts
@@ -116,6 +144,8 @@ src/
 │       ├── resources/            # Resource management
 │       ├── providers/            # Provider connections
 │       ├── training/             # Training modules
+│       ├── organization/         # Multi-tenancy & team management
+│       ├── analytics/            # Cost analytics & reporting
 │       └── auth/                 # Authentication
 │
 ├── theme/                         # Ionic theming
@@ -294,6 +324,61 @@ npm run build
 4. **Danger Zone**
    - Delete organization (requires confirmation)
    - Permanently removes all resources, members, and data
+
+### Analytics & Cost Tracking
+
+#### Viewing Cost Analytics
+
+1. **Access Analytics Dashboard**
+   - Navigate to Analytics from the main menu
+   - View cost overview card with total costs and trends
+   - See provider breakdown with interactive charts
+   - Monitor budget alerts and consumption
+
+2. **Detailed Cost Analysis**
+   - Click "View Detailed Analysis" to access comprehensive cost breakdown
+   - Filter by time range (Week, Month, Quarter, Year)
+   - Group costs by provider, resource type, or region
+   - View historical trends and forecasts
+   - Export data for external analysis
+
+#### Usage Analytics
+
+1. **Resource Usage Metrics**
+   - Navigate to Analytics → Usage Analytics
+   - View total, active, inactive, and error resource counts
+   - Monitor overall utilization percentage
+   - Track performance metrics (uptime, response time, error rate)
+
+2. **Performance Monitoring**
+   - Real-time uptime tracking
+   - Average response time monitoring
+   - Error rate analysis with trend indicators
+
+#### Cost Optimization
+
+1. **View Recommendations**
+   - Navigate to Analytics → Optimization
+   - See all active recommendations sorted by priority
+   - Each recommendation shows:
+     - Potential savings amount and percentage
+     - Priority level (1-5 stars)
+     - Implementation effort (Low, Medium, High)
+     - Impact level (Low, Medium, High)
+     - Affected resources count
+     - Detailed action items
+
+2. **Apply Recommendations**
+   - Review recommendation details and action items
+   - Click "View Resources" to see affected resources
+   - Click "Apply Recommendation" to implement changes
+   - Track savings over time
+
+3. **Budget Management**
+   - Set budget thresholds in Organization Settings
+   - Receive alerts when approaching limits (warning, critical)
+   - View budget consumption percentage
+   - Monitor spending trends to stay within budget
 
 ### Connecting Providers
 

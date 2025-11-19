@@ -1,0 +1,78 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/analytics"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cost Analytics</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="exportData()">
+        <ion-icon name="download-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="cost-analytics-container">
+    <ion-card *ngIf="costAnalytics$ | async as analytics">
+      <ion-card-header>
+        <ion-card-title>Detailed Cost Breakdown</ion-card-title>
+        <ion-card-subtitle>Total: ${{ analytics.totalCost.toFixed(2) }}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="cost-sections">
+          <!-- By Provider -->
+          <div class="cost-section">
+            <h3>Cost by Provider</h3>
+            <div *ngFor="let provider of analytics.breakdown.byProvider" class="cost-item">
+              <div class="cost-item-header">
+                <span class="name">{{ provider.provider | titlecase }}</span>
+                <span class="value">${{ provider.cost.toFixed(2) }}</span>
+              </div>
+              <ion-progress-bar [value]="provider.percentage / 100"></ion-progress-bar>
+              <div class="cost-item-meta">
+                <span>{{ provider.resourceCount }} resources</span>
+                <span>{{ provider.percentage.toFixed(1) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- By Resource Type -->
+          <div class="cost-section">
+            <h3>Cost by Resource Type</h3>
+            <div *ngFor="let type of analytics.breakdown.byResourceType" class="cost-item">
+              <div class="cost-item-header">
+                <span class="name">{{ type.type | titlecase }}</span>
+                <span class="value">${{ type.cost.toFixed(2) }}</span>
+              </div>
+              <ion-progress-bar [value]="type.percentage / 100" color="secondary"></ion-progress-bar>
+              <div class="cost-item-meta">
+                <span>{{ type.resourceCount }} resources</span>
+                <span>{{ type.percentage.toFixed(1) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Resources -->
+          <div class="cost-section">
+            <h3>Top 10 Most Expensive Resources</h3>
+            <ion-list>
+              <ion-item *ngFor="let resource of analytics.breakdown.topResources; let i = index">
+                <span slot="start" class="rank">#{{ i + 1 }}</span>
+                <ion-label>
+                  <h4>{{ resource.resourceName }}</h4>
+                  <p>{{ resource.provider | titlecase }} - {{ resource.type | titlecase }}</p>
+                </ion-label>
+                <div slot="end" class="resource-cost">
+                  <span class="amount">${{ resource.cost.toFixed(2) }}</span>
+                  <span class="percentage">{{ resource.percentage.toFixed(1) }}%</span>
+                </div>
+              </ion-item>
+            </ion-list>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

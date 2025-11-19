@@ -1,0 +1,78 @@
+.usage-container {
+  padding: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.metric-card {
+  background-color: var(--ion-color-light);
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+
+  h4 {
+    margin: 0 0 12px 0;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+
+  .metric-value {
+    font-size: 36px;
+    font-weight: 600;
+    margin: 0;
+
+    &.success {
+      color: var(--ion-color-success);
+    }
+
+    &.warning {
+      color: var(--ion-color-warning);
+    }
+
+    &.danger {
+      color: var(--ion-color-danger);
+    }
+  }
+}
+
+.utilization-section,
+.performance-section {
+  margin-top: 32px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+}
+
+.utilization-display {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+
+  .gauge {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 600;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+ion-list {
+  padding: 0;
+}

@@ -30,6 +30,10 @@ const routes: Routes = [
   {
     path: 'organization',
     loadChildren: () => import('./features/organization/organization.module').then(m => m.OrganizationModule)
+  },
+  {
+    path: 'analytics',
+    loadChildren: () => import('./features/analytics/analytics.module').then(m => m.AnalyticsModule)
   }
 ];
 

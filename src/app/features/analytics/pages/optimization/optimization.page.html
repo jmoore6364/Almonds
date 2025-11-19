@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/analytics"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Cost Optimization</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="optimization-container">
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Optimization Summary</ion-card-title>
+      </ion-card-header>
+      <ion-card-content *ngIf="recommendations$ | async as recommendations">
+        <div class="summary-stats">
+          <div class="stat">
+            <h3>{{ recommendations.length }}</h3>
+            <p>Recommendations</p>
+          </div>
+          <div class="stat">
+            <h3>${{ recommendations.reduce((sum, r) => sum + r.potentialSavings, 0).toFixed(2) }}</h3>
+            <p>Potential Savings</p>
+          </div>
+          <div class="stat">
+            <h3>{{ (recommendations.reduce((sum, r) => sum + r.savingsPercentage, 0) / recommendations.length).toFixed(0) }}%</h3>
+            <p>Avg. Savings</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div *ngIf="recommendations$ | async as recommendations">
+      <ion-card *ngFor="let rec of recommendations" class="recommendation-card">
+        <ion-card-header>
+          <div class="rec-header">
+            <div class="rec-title">
+              <div class="priority-stars">
+                <ion-icon *ngFor="let star of getPriorityStars(rec.priority)" name="star" color="warning"></ion-icon>
+              </div>
+              <ion-card-title>{{ rec.title }}</ion-card-title>
+            </div>
+            <div class="rec-savings">
+              <span class="amount">${{ rec.potentialSavings.toFixed(2) }}</span>
+              <span class="percentage">{{ rec.savingsPercentage }}% savings</span>
+            </div>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p class="description">{{ rec.description }}</p>
+
+          <div class="rec-meta">
+            <ion-chip outline="true">
+              <ion-icon name="build-outline"></ion-icon>
+              <ion-label>{{ rec.type | titlecase }}</ion-label>
+            </ion-chip>
+            <ion-chip outline="true" [color]="getEffortColor(rec.effort)">
+              <ion-icon name="time-outline"></ion-icon>
+              <ion-label>{{ rec.effort | titlecase }} effort</ion-label>
+            </ion-chip>
+            <ion-chip outline="true" [color]="getImpactColor(rec.impact)">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              <ion-label>{{ rec.impact | titlecase }} impact</ion-label>
+            </ion-chip>
+          </div>
+
+          <div class="action-items">
+            <h4>Action Items:</h4>
+            <ul>
+              <li *ngFor="let item of rec.actionItems">{{ item }}</li>
+            </ul>
+          </div>
+
+          <div class="affected-resources">
+            <p><strong>Affected Resources:</strong> {{ rec.resourceIds.length }} resource(s)</p>
+          </div>
+
+          <div class="rec-actions">
+            <ion-button expand="block">
+              <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+              Apply Recommendation
+            </ion-button>
+            <ion-button expand="block" fill="outline">
+              <ion-icon name="eye-outline" slot="start"></ion-icon>
+              View Resources
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

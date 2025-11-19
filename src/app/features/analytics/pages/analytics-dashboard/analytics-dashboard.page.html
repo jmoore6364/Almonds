@@ -1,0 +1,259 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Analytics & Insights</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="download-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedTimeRange" (ionChange)="onTimeRangeChange($event)">
+      <ion-segment-button *ngFor="let range of timeRanges" [value]="range.value">
+        <ion-label>{{ range.label }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="analytics-container">
+    <!-- Cost Overview -->
+    <ion-card *ngIf="costAnalytics$ | async as costAnalytics" class="cost-overview-card">
+      <ion-card-header>
+        <div class="card-header-with-action">
+          <div>
+            <ion-card-title>Cost Overview</ion-card-title>
+            <ion-card-subtitle>{{ selectedTimeRange | titlecase }} spending</ion-card-subtitle>
+          </div>
+          <ion-button fill="clear" (click)="viewCostDetails()">
+            View Details
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="total-cost">
+          <h1>${{ costAnalytics.totalCost.toFixed(2) }}</h1>
+          <div class="cost-change" [class.positive]="costAnalytics.comparisons.direction === 'up'" [class.negative]="costAnalytics.comparisons.direction === 'down'">
+            <ion-icon [name]="costAnalytics.comparisons.direction === 'up' ? 'arrow-up' : 'arrow-down'"></ion-icon>
+            <span>{{ costAnalytics.comparisons.percentageChange.toFixed(1) }}%</span>
+          </div>
+        </div>
+
+        <div class="cost-breakdown-grid">
+          <div *ngFor="let provider of costAnalytics.breakdown.byProvider.slice(0, 4)" class="breakdown-item">
+            <div class="breakdown-header">
+              <span class="provider-name">{{ provider.provider | titlecase }}</span>
+              <span class="provider-cost">${{ provider.cost.toFixed(2) }}</span>
+            </div>
+            <ion-progress-bar [value]="provider.percentage / 100" [color]="provider.trend >= 0 ? 'success' : 'warning'"></ion-progress-bar>
+            <div class="breakdown-footer">
+              <span class="percentage">{{ provider.percentage.toFixed(1) }}%</span>
+              <span class="trend" [class.up]="provider.trend >= 0" [class.down]="provider.trend < 0">
+                {{ provider.trend >= 0 ? '+' : '' }}{{ provider.trend.toFixed(1) }}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast-section">
+          <h4>Cost Forecast</h4>
+          <div class="forecast-items">
+            <div class="forecast-item">
+              <span class="label">Next Month:</span>
+              <span class="value">${{ costAnalytics.forecast.nextMonth.toFixed(2) }}</span>
+            </div>
+            <div class="forecast-item">
+              <span class="label">Next Quarter:</span>
+              <span class="value">${{ costAnalytics.forecast.nextQuarter.toFixed(2) }}</span>
+            </div>
+            <div class="forecast-item">
+              <span class="label">Confidence:</span>
+              <span class="value">{{ costAnalytics.forecast.confidence }}%</span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Usage Overview -->
+    <ion-card *ngIf="usageAnalytics$ | async as usageAnalytics">
+      <ion-card-header>
+        <div class="card-header-with-action">
+          <div>
+            <ion-card-title>Resource Usage</ion-card-title>
+            <ion-card-subtitle>Current utilization metrics</ion-card-subtitle>
+          </div>
+          <ion-button fill="clear" (click)="viewUsageDetails()">
+            View Details
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="usage-stats-grid">
+          <div class="stat-box">
+            <div class="stat-icon" style="background-color: rgba(var(--ion-color-primary-rgb), 0.1)">
+              <ion-icon name="layers-outline" color="primary"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ usageAnalytics.resourceMetrics.totalResources }}</h3>
+              <p>Total Resources</p>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background-color: rgba(var(--ion-color-success-rgb), 0.1)">
+              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ usageAnalytics.resourceMetrics.activeResources }}</h3>
+              <p>Active</p>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background-color: rgba(var(--ion-color-warning-rgb), 0.1)">
+              <ion-icon name="pause-circle-outline" color="warning"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ usageAnalytics.resourceMetrics.inactiveResources }}</h3>
+              <p>Inactive</p>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background-color: rgba(var(--ion-color-danger-rgb), 0.1)">
+              <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ usageAnalytics.resourceMetrics.errorResources }}</h3>
+              <p>Errors</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="utilization-meter">
+          <h4>Overall Utilization</h4>
+          <div class="meter-container">
+            <ion-progress-bar [value]="usageAnalytics.utilizationMetrics.overall / 100" color="primary"></ion-progress-bar>
+            <span class="meter-value">{{ usageAnalytics.utilizationMetrics.overall.toFixed(1) }}%</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Budget Alerts -->
+    <ion-card *ngIf="budgetAlerts$ | async as budgetAlerts">
+      <ion-card-header>
+        <ion-card-title>Budget Alerts</ion-card-title>
+        <ion-card-subtitle>{{ budgetAlerts.length }} active budget(s)</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ion-list *ngIf="budgetAlerts.length > 0; else noBudgets">
+          <ion-item *ngFor="let alert of budgetAlerts">
+            <ion-icon [name]="alert.status === 'ok' ? 'checkmark-circle' : alert.status === 'warning' ? 'warning' : 'alert-circle'" [color]="getAlertColor(alert.status)" slot="start"></ion-icon>
+            <ion-label>
+              <h3>{{ alert.name }}</h3>
+              <p>${{ alert.currentSpend.toFixed(2) }} of ${{ alert.budgetAmount.toFixed(2) }} ({{ alert.percentage.toFixed(0) }}%)</p>
+            </ion-label>
+            <ion-badge [color]="getAlertColor(alert.status)" slot="end">
+              {{ alert.status | titlecase }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+        <ng-template #noBudgets>
+          <p class="no-data">No budget alerts configured</p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Cost Optimization Recommendations -->
+    <ion-card *ngIf="recommendations$ | async as recommendations">
+      <ion-card-header>
+        <div class="card-header-with-action">
+          <div>
+            <ion-card-title>Cost Optimization</ion-card-title>
+            <ion-card-subtitle>
+              Potential savings: ${{ recommendations.reduce((sum, r) => sum + r.potentialSavings, 0).toFixed(2) }}
+            </ion-card-subtitle>
+          </div>
+          <ion-button fill="clear" (click)="viewOptimization()">
+            View All
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div *ngFor="let rec of recommendations.slice(0, 3)" class="recommendation-item">
+          <div class="rec-header">
+            <div class="rec-title">
+              <div class="priority-stars">
+                <ion-icon *ngFor="let star of getPriorityStars(rec.priority)" name="star" color="warning"></ion-icon>
+              </div>
+              <h4>{{ rec.title }}</h4>
+            </div>
+            <div class="rec-savings">
+              <span class="amount">${{ rec.potentialSavings.toFixed(2) }}</span>
+              <span class="percentage">{{ rec.savingsPercentage }}%</span>
+            </div>
+          </div>
+
+          <p class="rec-description">{{ rec.description }}</p>
+
+          <div class="rec-meta">
+            <ion-chip outline="true">
+              <ion-icon name="build-outline"></ion-icon>
+              <ion-label>{{ rec.type | titlecase }}</ion-label>
+            </ion-chip>
+            <ion-chip outline="true" [color]="getEffortColor(rec.effort)">
+              <ion-icon name="time-outline"></ion-icon>
+              <ion-label>{{ rec.effort | titlecase }} effort</ion-label>
+            </ion-chip>
+            <ion-chip outline="true" color="primary">
+              <ion-icon name="trending-up-outline"></ion-icon>
+              <ion-label>{{ rec.impact | titlecase }} impact</ion-label>
+            </ion-chip>
+          </div>
+
+          <ion-button expand="block" fill="outline" size="small">
+            View Recommendation
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Quick Links -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Quick Actions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="quick-links">
+          <ion-button expand="block" fill="outline" (click)="viewCostDetails()">
+            <ion-icon name="analytics-outline" slot="start"></ion-icon>
+            Detailed Cost Analysis
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="viewUsageDetails()">
+            <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+            Usage Reports
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="viewOptimization()">
+            <ion-icon name="bulb-outline" slot="start"></ion-icon>
+            All Recommendations
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,0 +1,79 @@
+.cost-analytics-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cost-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.cost-section {
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--ion-color-dark);
+  }
+}
+
+.cost-item {
+  margin-bottom: 20px;
+
+  .cost-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    .name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+  }
+
+  ion-progress-bar {
+    margin-bottom: 8px;
+  }
+
+  .cost-item-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ion-color-medium);
+  }
+}
+
+ion-list {
+  padding: 0;
+}
+
+.rank {
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  font-size: 14px;
+  min-width: 30px;
+}
+
+.resource-cost {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  .amount {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ion-color-primary);
+  }
+
+  .percentage {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+  }
+}

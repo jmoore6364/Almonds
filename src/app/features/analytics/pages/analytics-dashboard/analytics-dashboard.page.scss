@@ -1,0 +1,329 @@
+.analytics-container {
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.card-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+// Cost Overview Card
+.cost-overview-card {
+  .total-cost {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 0;
+      color: var(--ion-color-primary);
+    }
+
+    .cost-change {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+
+      &.positive {
+        background-color: rgba(var(--ion-color-danger-rgb), 0.1);
+        color: var(--ion-color-danger);
+      }
+
+      &.negative {
+        background-color: rgba(var(--ion-color-success-rgb), 0.1);
+        color: var(--ion-color-success);
+      }
+
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
+
+  .cost-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .breakdown-item {
+      padding: 12px;
+      background-color: var(--ion-color-light);
+      border-radius: 8px;
+
+      .breakdown-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+
+        .provider-name {
+          font-weight: 600;
+          font-size: 14px;
+        }
+
+        .provider-cost {
+          font-weight: 600;
+          color: var(--ion-color-primary);
+        }
+      }
+
+      ion-progress-bar {
+        margin-bottom: 8px;
+      }
+
+      .breakdown-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+
+        .percentage {
+          color: var(--ion-color-medium);
+        }
+
+        .trend {
+          font-weight: 600;
+
+          &.up {
+            color: var(--ion-color-danger);
+          }
+
+          &.down {
+            color: var(--ion-color-success);
+          }
+        }
+      }
+    }
+  }
+
+  .forecast-section {
+    background-color: var(--ion-color-light);
+    padding: 16px;
+    border-radius: 8px;
+
+    h4 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .forecast-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+
+      .forecast-item {
+        display: flex;
+        justify-content: space-between;
+
+        .label {
+          color: var(--ion-color-medium);
+          font-size: 14px;
+        }
+
+        .value {
+          font-weight: 600;
+          color: var(--ion-color-dark);
+        }
+      }
+    }
+  }
+}
+
+// Usage Stats Grid
+.usage-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .stat-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--ion-color-light);
+    border-radius: 8px;
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 24px;
+      }
+    }
+
+    .stat-info {
+      h3 {
+        margin: 0 0 4px 0;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+.utilization-meter {
+  background-color: var(--ion-color-light);
+  padding: 16px;
+  border-radius: 8px;
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .meter-container {
+    position: relative;
+
+    ion-progress-bar {
+      height: 24px;
+      border-radius: 12px;
+    }
+
+    .meter-value {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 600;
+      color: white;
+      font-size: 14px;
+    }
+  }
+}
+
+// Recommendations
+.recommendation-item {
+  padding: 16px;
+  background-color: var(--ion-color-light);
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .rec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+
+    .rec-title {
+      flex: 1;
+
+      .priority-stars {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 8px;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+    }
+
+    .rec-savings {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+
+      .amount {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--ion-color-success);
+      }
+
+      .percentage {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  .rec-description {
+    margin: 0 0 12px 0;
+    color: var(--ion-color-medium-shade);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .rec-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    ion-chip {
+      margin: 0;
+      font-size: 12px;
+    }
+  }
+
+  ion-button {
+    margin-top: 12px;
+  }
+}
+
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: var(--ion-color-medium);
+  font-style: italic;
+}
+
+ion-list {
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .cost-breakdown-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .usage-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .total-cost {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
