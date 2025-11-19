@@ -1,0 +1,173 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alerts"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Health Monitoring</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleCreateForm()">
+        <ion-icon slot="icon-only" [name]="showCreateForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="health-monitoring-container">
+    <ion-card class="dashboard-card" *ngIf="dashboard$ | async as dashboard">
+      <ion-card-header>
+        <ion-card-title>Monitoring Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="dashboard-grid">
+          <div class="dashboard-stat">
+            <ion-icon name="pulse-outline" color="success"></ion-icon>
+            <div class="stat-info">
+              <h3>{{ dashboard.healthyServices }}</h3>
+              <p>Healthy</p>
+            </div>
+          </div>
+          <div class="dashboard-stat">
+            <ion-icon name="warning-outline" color="warning"></ion-icon>
+            <div class="stat-info">
+              <h3>{{ dashboard.degradedServices }}</h3>
+              <p>Degraded</p>
+            </div>
+          </div>
+          <div class="dashboard-stat">
+            <ion-icon name="close-circle-outline" color="danger"></ion-icon>
+            <div class="stat-info">
+              <h3>{{ dashboard.unhealthyServices }}</h3>
+              <p>Unhealthy</p>
+            </div>
+          </div>
+          <div class="dashboard-stat">
+            <ion-icon name="stats-chart-outline" color="primary"></ion-icon>
+            <div class="stat-info">
+              <h3>{{ dashboard.averageUptime.toFixed(1) }}%</h3>
+              <p>Avg Uptime</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="showCreateForm" class="create-form-card">
+      <ion-card-header>
+        <ion-card-title>Create Health Check</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="healthCheckForm" (ngSubmit)="createHealthCheck()">
+          <ion-item>
+            <ion-label position="stacked">Resource *</ion-label>
+            <ion-select formControlName="resourceId" interface="popover" placeholder="Select resource">
+              <ion-select-option *ngFor="let resource of (resources$ | async) || []" [value]="resource.id">
+                {{ resource.name }} ({{ resource.provider | uppercase }})
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Check Name *</ion-label>
+            <ion-input formControlName="name" placeholder="e.g., API Health Check"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Check Type *</ion-label>
+            <ion-select formControlName="type" interface="popover">
+              <ion-select-option *ngFor="let type of healthCheckTypes" [value]="type">
+                {{ type | uppercase }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="healthCheckForm.get('type')?.value === 'http' || healthCheckForm.get('type')?.value === 'https' || healthCheckForm.get('type')?.value === 'api'">
+            <ion-label position="stacked">Endpoint URL</ion-label>
+            <ion-input formControlName="endpoint" type="url" placeholder="https://api.example.com/health"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Check Interval (minutes) *</ion-label>
+            <ion-input formControlName="interval" type="number" placeholder="5"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Timeout (seconds) *</ion-label>
+            <ion-input formControlName="timeout" type="number" placeholder="10"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Enable immediately</ion-label>
+            <ion-toggle formControlName="enabled" color="success"></ion-toggle>
+          </ion-item>
+
+          <div class="form-actions">
+            <ion-button expand="block" type="submit" [disabled]="healthCheckForm.invalid">
+              Create Health Check
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="toggleCreateForm()">
+              Cancel
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Health Checks</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="healthChecks$ | async as healthChecks">
+          <ion-item *ngFor="let check of healthChecks">
+            <ion-icon
+              slot="start"
+              [name]="getHealthStatusIcon(check.status)"
+              [color]="getHealthStatusColor(check.status)">
+            </ion-icon>
+            <ion-label>
+              <h3>{{ check.name }}</h3>
+              <p *ngIf="resources$ | async as resources">
+                Resource: {{ getResourceName(check.resourceId, resources) }}
+              </p>
+              <div class="check-details">
+                <ion-chip [color]="getHealthStatusColor(check.status)" outline="true">
+                  <ion-label>{{ check.status | titlecase }}</ion-label>
+                </ion-chip>
+                <ion-chip outline="true">
+                  <ion-label>{{ check.type | uppercase }}</ion-label>
+                </ion-chip>
+                <span class="check-interval">Every {{ check.interval }}m</span>
+              </div>
+              <p *ngIf="check.lastCheck" class="last-check">
+                Last checked: {{ check.lastCheck | date:'short' }}
+              </p>
+              <p *ngIf="check.consecutiveFailures > 0" class="failures">
+                Consecutive failures: {{ check.consecutiveFailures }}
+              </p>
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [checked]="check.enabled"
+              (ionChange)="toggleHealthCheck(check)"
+              color="success">
+            </ion-toggle>
+            <ion-button
+              slot="end"
+              fill="clear"
+              color="danger"
+              (click)="deleteHealthCheck(check, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <ion-item *ngIf="healthChecks.length === 0">
+            <ion-label class="ion-text-center">
+              <p>No health checks configured yet. Create your first health check above.</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

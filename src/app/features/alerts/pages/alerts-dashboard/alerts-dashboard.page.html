@@ -1,0 +1,165 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Alerts & Monitoring</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="alerts-container">
+    <ion-card class="summary-card">
+      <ion-card-header>
+        <ion-card-title>Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content *ngIf="monitoringDashboard$ | async as dashboard">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <ion-icon name="notifications-outline" color="primary"></ion-icon>
+            <div class="summary-info">
+              <h3>{{ (activeAlertsCount$ | async) || 0 }}</h3>
+              <p>Active Alerts</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <ion-icon name="mail-outline" color="warning"></ion-icon>
+            <div class="summary-info">
+              <h3>{{ (unreadNotificationsCount$ | async) || 0 }}</h3>
+              <p>Unread Notifications</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <ion-icon name="pulse-outline" color="success"></ion-icon>
+            <div class="summary-info">
+              <h3>{{ dashboard.healthyServices }}</h3>
+              <p>Healthy Services</p>
+            </div>
+          </div>
+          <div class="summary-item">
+            <ion-icon name="warning-outline" color="danger"></ion-icon>
+            <div class="summary-info">
+              <h3>{{ dashboard.activeIncidents }}</h3>
+              <p>Active Incidents</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Active Alerts</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewAllAlerts()">
+            View All
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="alerts$ | async as alerts">
+          <ion-item *ngFor="let alert of alerts.slice(0, 5)" [button]="true">
+            <ion-icon
+              slot="start"
+              name="notifications-outline"
+              [color]="getSeverityColor(alert.severity)">
+            </ion-icon>
+            <ion-label>
+              <h3>{{ alert.name }}</h3>
+              <p>{{ alert.description }}</p>
+              <p class="alert-meta">
+                <ion-chip [color]="getSeverityColor(alert.severity)" outline="true">
+                  <ion-label>{{ alert.severity | titlecase }}</ion-label>
+                </ion-chip>
+                <ion-chip [color]="getStatusColor(alert.status)" outline="true">
+                  <ion-label>{{ alert.status | titlecase }}</ion-label>
+                </ion-chip>
+                <span *ngIf="alert.lastTriggered">
+                  Last triggered: {{ alert.lastTriggered | date:'short' }}
+                </span>
+              </p>
+            </ion-label>
+            <ion-toggle slot="end" [checked]="alert.enabled" color="success"></ion-toggle>
+          </ion-item>
+          <ion-item *ngIf="alerts.length === 0">
+            <ion-label class="ion-text-center">
+              <p>No active alerts</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Recent Notifications</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewAllNotifications()">
+            View All
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="recentNotifications$ | async as notifications">
+          <ion-item
+            *ngFor="let notification of notifications"
+            [button]="true"
+            [class.unread]="!notification.read"
+            (click)="markNotificationAsRead(notification.id)">
+            <ion-icon
+              slot="start"
+              [name]="notification.read ? 'mail-open-outline' : 'mail-outline'"
+              [color]="getSeverityColor(notification.severity)">
+            </ion-icon>
+            <ion-label>
+              <h3>{{ notification.title }}</h3>
+              <p>{{ notification.message }}</p>
+              <p class="notification-time">{{ notification.createdAt | date:'short' }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="notifications.length === 0">
+            <ion-label class="ion-text-center">
+              <p>No notifications</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="monitoringDashboard$ | async as dashboard">
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Service Health</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewHealthMonitoring()">
+            View Details
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="health-summary">
+          <div class="health-stat">
+            <div class="health-circle success">{{ dashboard.healthyServices }}</div>
+            <p>Healthy</p>
+          </div>
+          <div class="health-stat">
+            <div class="health-circle warning">{{ dashboard.degradedServices }}</div>
+            <p>Degraded</p>
+          </div>
+          <div class="health-stat">
+            <div class="health-circle danger">{{ dashboard.unhealthyServices }}</div>
+            <p>Unhealthy</p>
+          </div>
+          <div class="health-stat">
+            <div class="uptime-display">
+              <h3>{{ dashboard.averageUptime.toFixed(2) }}%</h3>
+              <p>Avg Uptime</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

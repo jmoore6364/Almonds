@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alerts"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Notifications</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="markAllAsRead()" *ngIf="(unreadCount$ | async) || 0 > 0">
+        <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="filter" (ionChange)="loadNotifications()">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="unread">
+        <ion-label>Unread ({{ (unreadCount$ | async) || 0 }})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="notifications-container">
+    <ion-list *ngIf="notifications$ | async as notifications">
+      <ion-item
+        *ngFor="let notification of notifications"
+        [button]="true"
+        [class.unread]="!notification.read"
+        (click)="markAsRead(notification)">
+        <ion-icon
+          slot="start"
+          [name]="getNotificationIcon(notification.type)"
+          [color]="getSeverityColor(notification.severity)">
+        </ion-icon>
+        <ion-label>
+          <h3>{{ notification.title }}</h3>
+          <p>{{ notification.message }}</p>
+          <div class="notification-meta">
+            <ion-chip [color]="getSeverityColor(notification.severity)" outline="true">
+              <ion-label>{{ notification.severity | titlecase }}</ion-label>
+            </ion-chip>
+            <span class="notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+          </div>
+        </ion-label>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          (click)="deleteNotification(notification, $event)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
+
+      <ion-item *ngIf="notifications.length === 0">
+        <ion-label class="ion-text-center">
+          <div class="empty-state">
+            <ion-icon name="mail-open-outline" color="medium"></ion-icon>
+            <p>No {{ filter === 'unread' ? 'unread ' : '' }}notifications</p>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

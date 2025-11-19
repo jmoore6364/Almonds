@@ -1,0 +1,158 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/alerts"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Alerts Management</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleCreateForm()">
+        <ion-icon slot="icon-only" [name]="showCreateForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="alerts-management-container">
+    <ion-card *ngIf="showCreateForm" class="create-form-card">
+      <ion-card-header>
+        <ion-card-title>Create New Alert</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="alertForm" (ngSubmit)="createAlert()">
+          <ion-item>
+            <ion-label position="stacked">Alert Name *</ion-label>
+            <ion-input formControlName="name" placeholder="Enter alert name"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Description *</ion-label>
+            <ion-textarea formControlName="description" placeholder="Describe what this alert monitors" rows="3"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Type *</ion-label>
+            <ion-select formControlName="type" interface="popover">
+              <ion-select-option *ngFor="let type of alertTypes" [value]="type">
+                {{ type | titlecase }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Severity *</ion-label>
+            <ion-select formControlName="severity" interface="popover">
+              <ion-select-option *ngFor="let severity of alertSeverities" [value]="severity">
+                {{ severity | titlecase }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <div class="condition-section">
+            <h4>Alert Condition</h4>
+            <ion-item>
+              <ion-label position="stacked">Metric *</ion-label>
+              <ion-input formControlName="metric" placeholder="e.g., monthly_cost, cpu_usage"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Operator *</ion-label>
+              <ion-select formControlName="operator" interface="popover">
+                <ion-select-option *ngFor="let operator of conditionOperators" [value]="operator">
+                  {{ operator | uppercase }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Threshold *</ion-label>
+              <ion-input formControlName="threshold" type="number" placeholder="Enter threshold value"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label position="stacked">Time Window (minutes)</ion-label>
+              <ion-input formControlName="timeWindow" type="number" placeholder="15"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="actions-section">
+            <h4>Alert Actions</h4>
+            <ion-item>
+              <ion-label>Email Notification</ion-label>
+              <ion-toggle formControlName="emailEnabled" color="primary"></ion-toggle>
+            </ion-item>
+
+            <ion-item *ngIf="alertForm.get('emailEnabled')?.value">
+              <ion-label position="stacked">Email Address *</ion-label>
+              <ion-input formControlName="emailTarget" type="email" placeholder="alerts@example.com"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-label>In-App Notification</ion-label>
+              <ion-toggle formControlName="inAppEnabled" color="primary"></ion-toggle>
+            </ion-item>
+          </div>
+
+          <div class="form-actions">
+            <ion-button expand="block" type="submit" [disabled]="alertForm.invalid">
+              Create Alert
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="toggleCreateForm()">
+              Cancel
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Alerts</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="alerts$ | async as alerts">
+          <ion-item *ngFor="let alert of alerts">
+            <ion-label>
+              <h3>{{ alert.name }}</h3>
+              <p>{{ alert.description }}</p>
+              <div class="alert-details">
+                <ion-chip [color]="getSeverityColor(alert.severity)" outline="true">
+                  <ion-label>{{ alert.severity | titlecase }}</ion-label>
+                </ion-chip>
+                <ion-chip [color]="getStatusColor(alert.status)" outline="true">
+                  <ion-label>{{ alert.status | titlecase }}</ion-label>
+                </ion-chip>
+                <ion-chip outline="true">
+                  <ion-label>{{ alert.type | titlecase }}</ion-label>
+                </ion-chip>
+                <span class="trigger-count">Triggered: {{ alert.triggerCount }} times</span>
+              </div>
+              <p *ngIf="alert.lastTriggered" class="last-triggered">
+                Last triggered: {{ alert.lastTriggered | date:'medium' }}
+              </p>
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [checked]="alert.enabled"
+              (ionChange)="toggleAlert(alert)"
+              color="success">
+            </ion-toggle>
+            <ion-button
+              slot="end"
+              fill="clear"
+              color="danger"
+              (click)="deleteAlert(alert, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <ion-item *ngIf="alerts.length === 0">
+            <ion-label class="ion-text-center">
+              <p>No alerts configured yet. Create your first alert above.</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
