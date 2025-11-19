@@ -209,16 +209,63 @@ src/
 └── assets/                        # Static assets
 ```
 
+## Architecture
+
+Almonds is a full-stack SaaS application with:
+
+- **Frontend**: Ionic/Angular progressive web app and mobile apps
+- **Backend**: NestJS REST API with PostgreSQL database
+- **Authentication**: JWT-based authentication with Passport.js
+- **Database**: PostgreSQL with Prisma ORM for type-safe database access
+- **Multi-tenancy**: Organization-scoped data isolation at database and application level
+- **Cloud SDKs**: AWS SDK, Azure SDK for cloud provider integrations
+- **Payments**: Stripe integration for subscription management
+- **Job Queues**: Bull + Redis for background processing
+
+```
+┌─────────────────────────────────────────┐
+│  Frontend (Ionic/Angular)               │
+│  - Progressive Web App                  │
+│  - iOS/Android Native Apps              │
+└─────────────────┬───────────────────────┘
+                  │ HTTP/REST
+                  ▼
+┌─────────────────────────────────────────┐
+│  Backend API (NestJS)                   │
+│  - JWT Authentication                   │
+│  - Multi-tenant API                     │
+│  - Swagger Documentation                │
+└─────────────────┬───────────────────────┘
+                  │
+        ┌─────────┴─────────┐
+        ▼                   ▼
+┌──────────────┐    ┌──────────────┐
+│  PostgreSQL  │    │ Cloud SDKs   │
+│  + Prisma    │    │ AWS | Azure  │
+└──────────────┘    └──────────────┘
+```
+
 ## Getting Started
+
+This repository contains both the frontend (Ionic/Angular) and backend (NestJS) applications.
 
 ### Prerequisites
 
+**Frontend:**
 - Node.js 18+ and npm 9+
 - Angular CLI: `npm install -g @angular/cli`
 - Ionic CLI: `npm install -g @ionic/cli`
 - (Optional) For mobile: Capacitor CLI
 
+**Backend:**
+- Node.js 18+ and npm 9+
+- PostgreSQL 14+
+- Redis 6+ (for job queues)
+- (Optional) Docker and Docker Compose
+
 ### Installation
+
+#### Option 1: Full Stack with Docker (Recommended)
 
 1. **Clone the repository**
    ```bash
@@ -226,21 +273,61 @@ src/
    cd almonds-resource-manager
    ```
 
-2. **Install dependencies**
+2. **Start the backend services (PostgreSQL + Redis)**
    ```bash
+   cd backend
+   docker-compose up -d
+   ```
+
+3. **Set up the backend**
+   ```bash
+   # Install dependencies
+   npm install
+
+   # Set up environment variables
+   cp .env.example .env
+   # Edit .env with your configuration
+
+   # Run database migrations
+   npm run prisma:migrate
+
+   # (Optional) Seed with demo data
+   npm run prisma:seed
+
+   # Start backend API
+   npm run start:dev
+   ```
+   Backend API runs at `http://localhost:3000`
+   API Documentation at `http://localhost:3000/api/docs`
+
+4. **Set up the frontend**
+   ```bash
+   cd ..  # back to root directory
+   npm install
+   npm start
+   ```
+   Frontend runs at `http://localhost:8100`
+
+#### Option 2: Frontend Only (Mock Data)
+
+1. **Clone and install**
+   ```bash
+   git clone https://github.com/yourusername/almonds-resource-manager.git
+   cd almonds-resource-manager
    npm install
    ```
 
-3. **Run the development server**
+2. **Run the development server**
    ```bash
-   # Web development server
    npm start
    # or
    ionic serve
    ```
 
-4. **Access the application**
-   Open your browser to `http://localhost:4200`
+3. **Access the application**
+   Open your browser to `http://localhost:8100`
+
+   Note: The app will use mock data without a real backend
 
 ### Building for Production
 

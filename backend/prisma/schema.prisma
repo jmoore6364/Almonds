@@ -1,0 +1,618 @@
+// Prisma Schema for Almonds Resource Manager
+// Multi-tenant SaaS architecture
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// CORE MODELS
+// ================================
+
+model User {
+  id                       String    @id @default(uuid())
+  email                    String    @unique
+  passwordHash             String    @map("password_hash")
+  name                     String
+  avatarUrl                String?   @map("avatar_url")
+  emailVerified            Boolean   @default(false) @map("email_verified")
+  emailVerificationToken   String?   @map("email_verification_token")
+  passwordResetToken       String?   @map("password_reset_token")
+  passwordResetExpires     DateTime? @map("password_reset_expires")
+  lastLogin                DateTime? @map("last_login")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  organizationMembers      OrganizationMember[]
+  invitationsSent          OrganizationInvitation[] @relation("InvitedBy")
+  apiKeysCreated           ApiKey[]
+  webhooksCreated          Webhook[]
+  workflowsCreated         Workflow[]
+  scheduledTasksCreated    ScheduledTask[]
+  autoScalingPoliciesCreated AutoScalingPolicy[]
+  iacTemplatesCreated      IacTemplate[]
+  alertsCreated            Alert[]
+  auditLogs                AuditLog[]
+  alertHistoryAcknowledged AlertHistory[]
+  complianceReportsGenerated ComplianceReport[]
+  iacDeploymentsCreated    IacDeployment[]
+  cloudProvidersCreated    CloudProvider[]
+
+  @@index([email])
+  @@index([emailVerificationToken])
+  @@map("users")
+}
+
+model Organization {
+  id                String    @id @default(uuid())
+  name              String
+  slug              String    @unique
+  description       String?
+  website           String?
+  plan              String    @default("free") // free, pro, business, enterprise
+  status            String    @default("active") // active, suspended, cancelled
+  trialEndsAt       DateTime? @map("trial_ends_at")
+  subscriptionId    String?   @map("subscription_id")
+  stripeCustomerId  String?   @map("stripe_customer_id")
+  settings          Json      @default("{}")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  members           OrganizationMember[]
+  invitations       OrganizationInvitation[]
+  cloudProviders    CloudProvider[]
+  resources         Resource[]
+  apiKeys           ApiKey[]
+  webhooks          Webhook[]
+  workflows         Workflow[]
+  scheduledTasks    ScheduledTask[]
+  autoScalingPolicies AutoScalingPolicy[]
+  alerts            Alert[]
+  healthChecks      HealthCheck[]
+  auditLogs         AuditLog[]
+  complianceReports ComplianceReport[]
+  iacTemplates      IacTemplate[]
+  iacDeployments    IacDeployment[]
+  subscriptions     Subscription[]
+  usageTracking     UsageTracking[]
+  costAnalytics     CostAnalytics[]
+
+  @@index([slug])
+  @@index([stripeCustomerId])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  role           String   // owner, admin, developer, viewer, billing
+  invitedBy      String?  @map("invited_by")
+  invitedAt      DateTime? @map("invited_at")
+  joinedAt       DateTime? @map("joined_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+model OrganizationInvitation {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  email          String
+  role           String
+  token          String   @unique
+  invitedBy      String   @map("invited_by")
+  expiresAt      DateTime @map("expires_at")
+  acceptedAt     DateTime? @map("accepted_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  inviter        User         @relation("InvitedBy", fields: [invitedBy], references: [id])
+
+  @@index([token])
+  @@index([email])
+  @@map("organization_invitations")
+}
+
+// ================================
+// RESOURCE MANAGEMENT
+// ================================
+
+model CloudProvider {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  provider       String    // aws, azure, gcp, railway, supabase, etc.
+  name           String
+  status         String    @default("active") // active, inactive, error
+  credentials    Json      // encrypted credentials
+  region         String?
+  lastSynced     DateTime? @map("last_synced")
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?        @relation(fields: [createdBy], references: [id])
+  resources      Resource[]
+
+  @@index([organizationId])
+  @@index([provider])
+  @@map("cloud_providers")
+}
+
+model Resource {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  providerId     String    @map("provider_id")
+  externalId     String    @map("external_id")
+  name           String
+  type           String    // compute, database, storage, network, etc.
+  provider       String    // aws, azure, etc.
+  status         String?   // active, inactive, error, pending
+  region         String?
+  tags           Json      @default("{}")
+  metadata       Json      @default("{}")
+  costPerMonth   Decimal?  @map("cost_per_month") @db.Decimal(10, 2)
+  currency       String    @default("USD")
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  cloudProvider  CloudProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  healthChecks   HealthCheck[]
+
+  @@unique([providerId, externalId])
+  @@index([organizationId])
+  @@index([providerId])
+  @@index([type])
+  @@index([status])
+  @@map("resources")
+}
+
+// ================================
+// API & INTEGRATIONS
+// ================================
+
+model ApiKey {
+  id                 String    @id @default(uuid())
+  organizationId     String    @map("organization_id")
+  name               String
+  description        String?
+  keyHash            String    @unique @map("key_hash")
+  keyPrefix          String    @map("key_prefix")
+  scopes             String[]  @default([])
+  status             String    @default("active") // active, revoked, expired, suspended
+  rateLimitPerMinute Int       @default(60) @map("rate_limit_per_minute")
+  rateLimitPerHour   Int       @default(3000) @map("rate_limit_per_hour")
+  rateLimitPerDay    Int       @default(50000) @map("rate_limit_per_day")
+  ipWhitelist        String[]  @default([]) @map("ip_whitelist")
+  lastUsed           DateTime? @map("last_used")
+  expiresAt          DateTime? @map("expires_at")
+  createdBy          String?   @map("created_by")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator            User?        @relation(fields: [createdBy], references: [id])
+  usage              ApiKeyUsage[]
+
+  @@index([organizationId])
+  @@index([keyHash])
+  @@index([status])
+  @@map("api_keys")
+}
+
+model ApiKeyUsage {
+  id             String   @id @default(uuid())
+  apiKeyId       String   @map("api_key_id")
+  endpoint       String?
+  method         String?
+  statusCode     Int?     @map("status_code")
+  responseTimeMs Int?     @map("response_time_ms")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  errorMessage   String?  @map("error_message")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  apiKey         ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId])
+  @@index([createdAt])
+  @@map("api_key_usage")
+}
+
+model Webhook {
+  id            String    @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name          String
+  description   String?
+  url           String
+  secret        String
+  events        String[]  @default([])
+  enabled       Boolean   @default(true)
+  status        String    @default("healthy") // healthy, failing, disabled
+  headers       Json      @default("{}")
+  retryConfig   Json      @default("{\"maxRetries\":3,\"retryDelayMs\":1000,\"backoffMultiplier\":2,\"timeout\":5000}") @map("retry_config")
+  lastTriggered DateTime? @map("last_triggered")
+  createdBy     String?   @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  organization  Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator       User?              @relation(fields: [createdBy], references: [id])
+  deliveries    WebhookDelivery[]
+
+  @@index([organizationId])
+  @@index([enabled])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id             String    @id @default(uuid())
+  webhookId      String    @map("webhook_id")
+  event          String
+  payload        Json?
+  status         String?   // pending, success, failed, retrying
+  statusCode     Int?      @map("status_code")
+  responseTimeMs Int?      @map("response_time_ms")
+  attempts       Int       @default(0)
+  errorMessage   String?   @map("error_message")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  deliveredAt    DateTime? @map("delivered_at")
+
+  webhook        Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+// ================================
+// AUTOMATION & WORKFLOWS
+// ================================
+
+model Workflow {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  trigger        String   // manual, schedule, event
+  triggerConfig  Json     @default("{}") @map("trigger_config")
+  actions        Json     @default("[]")
+  enabled        Boolean  @default(true)
+  lastRun        DateTime? @map("last_run")
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?               @relation(fields: [createdBy], references: [id])
+  executions     WorkflowExecution[]
+
+  @@index([organizationId])
+  @@index([enabled])
+  @@map("workflows")
+}
+
+model WorkflowExecution {
+  id          String    @id @default(uuid())
+  workflowId  String    @map("workflow_id")
+  status      String    // pending, running, completed, failed
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  input       Json?
+  output      Json?
+  error       String?
+  logs        Json      @default("[]")
+
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("workflow_executions")
+}
+
+model ScheduledTask {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  name           String
+  description    String?
+  taskType       String    @map("task_type") // backup, cleanup, sync, custom
+  schedule       String    // cron expression
+  enabled        Boolean   @default(true)
+  config         Json      @default("{}")
+  lastRun        DateTime? @map("last_run")
+  nextRun        DateTime? @map("next_run")
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?        @relation(fields: [createdBy], references: [id])
+
+  @@index([organizationId])
+  @@index([enabled])
+  @@index([nextRun])
+  @@map("scheduled_tasks")
+}
+
+model AutoScalingPolicy {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  resourceType   String   @map("resource_type")
+  metricType     String   @map("metric_type") // cpu, memory, requests, custom
+  scaleUpThreshold   Decimal  @map("scale_up_threshold") @db.Decimal(5, 2)
+  scaleDownThreshold Decimal  @map("scale_down_threshold") @db.Decimal(5, 2)
+  minInstances   Int      @map("min_instances")
+  maxInstances   Int      @map("max_instances")
+  cooldownPeriod Int      @map("cooldown_period") // seconds
+  enabled        Boolean  @default(true)
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?        @relation(fields: [createdBy], references: [id])
+
+  @@index([organizationId])
+  @@index([enabled])
+  @@map("auto_scaling_policies")
+}
+
+// ================================
+// MONITORING & ALERTS
+// ================================
+
+model Alert {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  severity       String   // info, warning, critical
+  condition      Json     // condition configuration
+  channels       String[] @default([]) // email, slack, webhook
+  enabled        Boolean  @default(true)
+  lastTriggered  DateTime? @map("last_triggered")
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?          @relation(fields: [createdBy], references: [id])
+  history        AlertHistory[]
+
+  @@index([organizationId])
+  @@index([enabled])
+  @@index([severity])
+  @@map("alerts")
+}
+
+model AlertHistory {
+  id              String    @id @default(uuid())
+  alertId         String    @map("alert_id")
+  severity        String
+  message         String
+  details         Json?
+  triggeredAt     DateTime  @default(now()) @map("triggered_at")
+  acknowledgedAt  DateTime? @map("acknowledged_at")
+  acknowledgedBy  String?   @map("acknowledged_by")
+  resolvedAt      DateTime? @map("resolved_at")
+
+  alert           Alert     @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  acknowledger    User?     @relation(fields: [acknowledgedBy], references: [id])
+
+  @@index([alertId])
+  @@index([triggeredAt])
+  @@index([severity])
+  @@map("alert_history")
+}
+
+model HealthCheck {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  resourceId     String?   @map("resource_id")
+  name           String
+  checkType      String    @map("check_type") // http, tcp, ping, custom
+  endpoint       String?
+  interval       Int       @default(300) // seconds
+  timeout        Int       @default(30) // seconds
+  enabled        Boolean   @default(true)
+  status         String    @default("unknown") // healthy, unhealthy, unknown
+  lastCheck      DateTime? @map("last_check")
+  lastSuccess    DateTime? @map("last_success")
+  consecutiveFailures Int   @default(0) @map("consecutive_failures")
+  config         Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  resource       Resource?    @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([resourceId])
+  @@index([enabled])
+  @@index([status])
+  @@map("health_checks")
+}
+
+// ================================
+// AUDIT & COMPLIANCE
+// ================================
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String
+  resource       String?
+  resourceId     String?  @map("resource_id")
+  details        Json?
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  status         String?  // success, failure
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?        @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model ComplianceReport {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  reportType     String   @map("report_type") // gdpr, hipaa, soc2, iso27001
+  status         String   // pending, generating, completed, failed
+  findings       Json     @default("[]")
+  score          Decimal? @db.Decimal(5, 2)
+  generatedBy    String?  @map("generated_by")
+  generatedAt    DateTime @default(now()) @map("generated_at")
+  completedAt    DateTime? @map("completed_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  generator      User?        @relation(fields: [generatedBy], references: [id])
+
+  @@index([organizationId])
+  @@index([reportType])
+  @@index([generatedAt])
+  @@map("compliance_reports")
+}
+
+// ================================
+// INFRASTRUCTURE AS CODE
+// ================================
+
+model IacTemplate {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  name           String
+  description    String?
+  type           String   // terraform, cloudformation, pulumi, ansible, custom
+  category       String   // compute, storage, network, database
+  content        String   @db.Text
+  variables      Json     @default("[]")
+  tags           String[] @default([])
+  isPublic       Boolean  @default(false) @map("is_public")
+  rating         Decimal? @db.Decimal(3, 2)
+  deployments    Int      @default(0)
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User?           @relation(fields: [createdBy], references: [id])
+  deploymentRuns IacDeployment[]
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([category])
+  @@index([isPublic])
+  @@map("iac_templates")
+}
+
+model IacDeployment {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  templateId     String    @map("template_id")
+  name           String
+  status         String    // pending, deploying, deployed, failed, destroying
+  inputs         Json      @default("{}")
+  outputs        Json?
+  logs           String?   @db.Text
+  errorMessage   String?   @map("error_message")
+  deployedBy     String?   @map("deployed_by")
+  deployedAt     DateTime  @default(now()) @map("deployed_at")
+  completedAt    DateTime? @map("completed_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template       IacTemplate  @relation(fields: [templateId], references: [id])
+  deployer       User?        @relation(fields: [deployedBy], references: [id])
+
+  @@index([organizationId])
+  @@index([templateId])
+  @@index([status])
+  @@map("iac_deployments")
+}
+
+// ================================
+// BILLING & USAGE
+// ================================
+
+model Subscription {
+  id                  String    @id @default(uuid())
+  organizationId      String    @map("organization_id")
+  plan                String    // free, pro, business, enterprise
+  status              String    // active, canceled, past_due, trialing
+  stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
+  currentPeriodStart  DateTime  @map("current_period_start")
+  currentPeriodEnd    DateTime  @map("current_period_end")
+  cancelAtPeriodEnd   Boolean   @default(false) @map("cancel_at_period_end")
+  canceledAt          DateTime? @map("canceled_at")
+  trialStart          DateTime? @map("trial_start")
+  trialEnd            DateTime? @map("trial_end")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model UsageTracking {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  metricType     String   @map("metric_type") // api_requests, resources, storage, bandwidth
+  quantity       Int
+  unit           String   // requests, gb, mb
+  timestamp      DateTime @default(now())
+  metadata       Json?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([metricType])
+  @@index([timestamp])
+  @@map("usage_tracking")
+}
+
+model CostAnalytics {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  provider       String   // aws, azure, gcp
+  service        String   // ec2, s3, compute, etc.
+  region         String?
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("USD")
+  date           DateTime
+  breakdown      Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([provider])
+  @@index([date])
+  @@map("cost_analytics")
+}
