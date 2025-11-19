@@ -34,7 +34,7 @@ export class UsersService {
     });
   }
 
-  async create(data: { email: string; name: string; passwordHash: string }) {
+  async create(data: { email: string; name: string; passwordHash: string; emailVerificationToken?: string }) {
     const user = await this.prisma.user.create({
       data,
       select: {
@@ -47,6 +47,80 @@ export class UsersService {
     });
 
     return user;
+  }
+
+  async findByVerificationToken(token: string) {
+    return this.prisma.user.findFirst({
+      where: { emailVerificationToken: token },
+    });
+  }
+
+  async findByPasswordResetToken(token: string) {
+    return this.prisma.user.findFirst({
+      where: { passwordResetToken: token },
+    });
+  }
+
+  async verifyEmail(id: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+      },
+    });
+  }
+
+  async updateVerificationToken(id: string, token: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { emailVerificationToken: token },
+    });
+  }
+
+  async updatePasswordResetToken(id: string, token: string, expiresAt: Date) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        passwordResetToken: token,
+        passwordResetExpires: expiresAt,
+      },
+    });
+  }
+
+  async updatePassword(id: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        passwordHash,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      },
+    });
+  }
+
+  async updateTwoFactorSecret(id: string, secret: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { twoFactorSecret: secret },
+    });
+  }
+
+  async enableTwoFactor(id: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { twoFactorEnabled: true },
+    });
+  }
+
+  async disableTwoFactor(id: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        twoFactorEnabled: false,
+        twoFactorSecret: null,
+      },
+    });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {

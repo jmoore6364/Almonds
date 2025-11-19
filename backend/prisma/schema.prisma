@@ -24,6 +24,8 @@ model User {
   emailVerificationToken   String?   @map("email_verification_token")
   passwordResetToken       String?   @map("password_reset_token")
   passwordResetExpires     DateTime? @map("password_reset_expires")
+  twoFactorSecret          String?   @map("two_factor_secret")
+  twoFactorEnabled         Boolean   @default(false) @map("two_factor_enabled")
   lastLogin                DateTime? @map("last_login")
   createdAt                DateTime  @default(now()) @map("created_at")
   updatedAt                DateTime  @updatedAt @map("updated_at")
