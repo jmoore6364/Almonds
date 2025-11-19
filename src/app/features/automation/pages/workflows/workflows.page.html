@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/automation"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Workflows</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="workflows-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Workflows</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="workflows$ | async as workflows">
+          <ion-item *ngFor="let workflow of workflows">
+            <ion-icon slot="start" name="git-network-outline" [color]="workflow.enabled ? 'primary' : 'medium'"></ion-icon>
+            <ion-label>
+              <h3>{{ workflow.name }}</h3>
+              <p>{{ workflow.description }}</p>
+              <p class="workflow-stats">
+                Trigger: {{ workflow.trigger.type | titlecase }} |
+                Actions: {{ workflow.actions.length }} |
+                Executions: {{ workflow.executionCount }}
+              </p>
+            </ion-label>
+            <ion-button fill="clear" (click)="executeWorkflow(workflow, $event)">
+              <ion-icon slot="icon-only" name="play-outline"></ion-icon>
+            </ion-button>
+            <ion-toggle [checked]="workflow.enabled" (ionChange)="toggleWorkflow(workflow)" color="success"></ion-toggle>
+            <ion-button fill="clear" color="danger" (click)="deleteWorkflow(workflow, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

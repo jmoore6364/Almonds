@@ -38,6 +38,10 @@ const routes: Routes = [
   {
     path: 'alerts',
     loadChildren: () => import('./features/alerts/alerts.module').then(m => m.AlertsModule)
+  },
+  {
+    path: 'automation',
+    loadChildren: () => import('./features/automation/automation.module').then(m => m.AutomationModule)
   }
 ];
 

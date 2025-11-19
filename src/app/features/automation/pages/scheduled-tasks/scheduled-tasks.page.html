@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/automation"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Scheduled Tasks</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="tasks-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Scheduled Tasks</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="tasks$ | async as tasks">
+          <ion-item *ngFor="let task of tasks">
+            <ion-icon slot="start" name="time-outline" [color]="task.enabled ? 'success' : 'medium'"></ion-icon>
+            <ion-label>
+              <h3>{{ task.name }}</h3>
+              <p>{{ task.description }}</p>
+              <p class="task-schedule">
+                Schedule: {{ task.schedule.type | titlecase }}
+                <span *ngIf="task.nextRun"> | Next: {{ task.nextRun | date:'short' }}</span>
+              </p>
+            </ion-label>
+            <ion-toggle [checked]="task.enabled" (ionChange)="toggleTask(task)" color="success"></ion-toggle>
+            <ion-button fill="clear" color="danger" (click)="deleteTask(task, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

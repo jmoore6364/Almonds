@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Automation</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="automation-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Automation Overview</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="overview-grid">
+          <div class="overview-item" (click)="viewWorkflows()">
+            <ion-icon name="git-network-outline" color="primary"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (activeWorkflowsCount$ | async) || 0 }}</h3>
+              <p>Active Workflows</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewScheduledTasks()">
+            <ion-icon name="time-outline" color="success"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (activeTasksCount$ | async) || 0 }}</h3>
+              <p>Scheduled Tasks</p>
+            </div>
+          </div>
+          <div class="overview-item" (click)="viewAutoScaling()">
+            <ion-icon name="trending-up-outline" color="warning"></ion-icon>
+            <div class="overview-info">
+              <h3>{{ (activePoliciesCount$ | async) || 0 }}</h3>
+              <p>Auto-Scaling Policies</p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Recent Workflows</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewWorkflows()">
+            View All
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="workflows$ | async as workflows">
+          <ion-item *ngFor="let workflow of workflows.slice(0, 5)" [button]="true">
+            <ion-icon slot="start" name="git-network-outline" [color]="workflow.enabled ? 'primary' : 'medium'"></ion-icon>
+            <ion-label>
+              <h3>{{ workflow.name }}</h3>
+              <p>{{ workflow.description }}</p>
+              <p class="workflow-meta">
+                Executed {{ workflow.executionCount }} times
+                <span *ngIf="workflow.lastExecuted"> | Last: {{ workflow.lastExecuted | date:'short' }}</span>
+              </p>
+            </ion-label>
+            <ion-badge [color]="workflow.enabled ? 'success' : 'medium'">
+              {{ workflow.enabled ? 'Active' : 'Disabled' }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-row">
+          <ion-card-title>Scheduled Tasks</ion-card-title>
+          <ion-button fill="clear" size="small" (click)="viewScheduledTasks()">
+            View All
+            <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="scheduledTasks$ | async as tasks">
+          <ion-item *ngFor="let task of tasks.slice(0, 5)" [button]="true">
+            <ion-icon slot="start" name="time-outline" [color]="task.enabled ? 'success' : 'medium'"></ion-icon>
+            <ion-label>
+              <h3>{{ task.name }}</h3>
+              <p>{{ task.description }}</p>
+              <p class="task-meta" *ngIf="task.nextRun">Next run: {{ task.nextRun | date:'short' }}</p>
+            </ion-label>
+            <ion-badge [color]="task.enabled ? 'success' : 'medium'">
+              {{ task.enabled ? 'Active' : 'Disabled' }}
+            </ion-badge>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

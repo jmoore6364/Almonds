@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/automation"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Auto-Scaling Policies</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="scaling-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>All Auto-Scaling Policies</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list *ngIf="policies$ | async as policies">
+          <ion-item *ngFor="let policy of policies">
+            <ion-icon slot="start" name="trending-up-outline" [color]="policy.enabled ? 'warning' : 'medium'"></ion-icon>
+            <ion-label>
+              <h3>{{ policy.name }}</h3>
+              <p>{{ policy.description }}</p>
+              <p class="policy-limits">
+                Min: {{ policy.minInstances }} | Max: {{ policy.maxInstances }} | Cooldown: {{ policy.cooldownPeriod }}m
+              </p>
+            </ion-label>
+            <ion-toggle [checked]="policy.enabled" (ionChange)="togglePolicy(policy)" color="success"></ion-toggle>
+            <ion-button fill="clear" color="danger" (click)="deletePolicy(policy, $event)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
