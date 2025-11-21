@@ -1,0 +1,127 @@
+# Google Cloud Load Balancer Ingress Configuration
+# Uses GKE Ingress with Cloud Load Balancing
+# https://cloud.google.com/kubernetes-engine/docs/concepts/ingress
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: almonds-api-gclb
+  namespace: default
+  labels:
+    app: almonds-api
+  annotations:
+    # Ingress class
+    kubernetes.io/ingress.class: "gce"
+
+    # Global external load balancer
+    kubernetes.io/ingress.global-static-ip-name: "almonds-api-ip"
+
+    # SSL certificate (managed by Google)
+    networking.gke.io/managed-certificates: "almonds-ssl-cert"
+
+    # SSL policy
+    cloud.google.com/ssl-policy: "almonds-ssl-policy"
+
+    # Backend configuration
+    cloud.google.com/backend-config: '{"default": "almonds-backend-config"}'
+
+    # NEG (Network Endpoint Groups) for better performance
+    cloud.google.com/neg: '{"ingress": true}'
+
+    # Cloud Armor security policy
+    cloud.google.com/armor-config: '{"almonds-api": "almonds-security-policy"}'
+
+spec:
+  rules:
+    - host: api.almonds.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: almonds-api
+                port:
+                  number: 80
+---
+# Managed SSL Certificate
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: almonds-ssl-cert
+  namespace: default
+spec:
+  domains:
+    - api.almonds.io
+---
+# Backend Configuration
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: almonds-backend-config
+  namespace: default
+spec:
+  # Health check configuration
+  healthCheck:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 2
+    unhealthyThreshold: 3
+    type: HTTP
+    requestPath: /api/v1/health/ready
+    port: 3000
+
+  # Connection draining
+  connectionDraining:
+    drainingTimeoutSec: 30
+
+  # Session affinity
+  sessionAffinity:
+    affinityType: "CLIENT_IP"
+    affinityCookieTtlSec: 86400
+
+  # CDN configuration (optional)
+  cdn:
+    enabled: true
+    cachePolicy:
+      includeHost: true
+      includeProtocol: true
+      includeQueryString: false
+    negativeCaching: true
+    negativeCachingPolicy:
+      - code: 404
+        ttl: 120
+      - code: 500
+        ttl: 60
+
+  # IAP (Identity-Aware Proxy) - optional
+  # iap:
+  #   enabled: true
+  #   oauthclientCredentials:
+  #     secretName: almonds-oauth-credentials
+
+  # Custom request/response headers
+  customRequestHeaders:
+    headers:
+      - "X-Client-Region:{client_region}"
+      - "X-Client-City:{client_city}"
+
+  # Timeout configuration
+  timeoutSec: 60
+
+  # Logging
+  logging:
+    enable: true
+    sampleRate: 1.0
+---
+# Frontend Configuration (SSL Policy)
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: almonds-frontend-config
+  namespace: default
+spec:
+  sslPolicy: almonds-ssl-policy
+  redirectToHttps:
+    enabled: true
+    responseCodeName: "MOVED_PERMANENTLY_DEFAULT"

@@ -1,0 +1,177 @@
+# Azure AKS Specific Deployment Configuration
+# This configuration includes Azure-specific annotations and integrations
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: almonds-api
+  namespace: default
+  labels:
+    app: almonds-api
+    component: backend
+    cloud: azure
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: almonds-api
+  template:
+    metadata:
+      labels:
+        app: almonds-api
+        component: backend
+        aadpodidbinding: almonds-api-identity
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/v1/metrics"
+    spec:
+      serviceAccountName: almonds-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: almonds-api
+          image: ${ACR_NAME}.azurecr.io/almonds-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: AZURE_REGION
+              value: "${AZURE_REGION}"
+            # Database URL from Azure Database for PostgreSQL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: database-url
+            # Redis from Azure Cache for Redis
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: redis-host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: redis-port
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: redis-password
+            - name: REDIS_TLS
+              value: "true"
+            # Azure-specific environment variables
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: azure-tenant-id
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: azure-client-id
+            - name: AZURE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: azure-client-secret
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: jwt-secret
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: stripe-secret-key
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: sendgrid-api-key
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: cors-origin
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/live
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+          # Volume mounts for Azure Files or Disks
+          volumeMounts:
+            - name: azure-files
+              mountPath: /app/uploads
+      volumes:
+        - name: azure-files
+          persistentVolumeClaim:
+            claimName: almonds-uploads-pvc
+      terminationGracePeriodSeconds: 30
+      # Node affinity for multi-zone deployment
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - almonds-api
+                topologyKey: topology.kubernetes.io/zone
+---
+# Persistent Volume Claim for Azure Files
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: almonds-uploads-pvc
+  labels:
+    app: almonds-api
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 100Gi

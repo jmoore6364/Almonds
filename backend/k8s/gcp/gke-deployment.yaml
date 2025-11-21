@@ -1,0 +1,165 @@
+# GCP GKE Specific Deployment Configuration
+# This configuration includes GCP-specific annotations and integrations
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: almonds-api
+  namespace: default
+  labels:
+    app: almonds-api
+    component: backend
+    cloud: gcp
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: almonds-api
+  template:
+    metadata:
+      labels:
+        app: almonds-api
+        component: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/v1/metrics"
+    spec:
+      serviceAccountName: almonds-api
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: almonds-api
+          image: gcr.io/${PROJECT_ID}/almonds-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: GCP_PROJECT_ID
+              value: "${PROJECT_ID}"
+            - name: GCP_REGION
+              value: "${GCP_REGION}"
+            # Database URL from Cloud SQL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: database-url
+            # Redis from Memorystore
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: redis-host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: redis-port
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: redis-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: jwt-secret
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: stripe-secret-key
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: almonds-secrets
+                  key: sendgrid-api-key
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: almonds-config
+                  key: cors-origin
+            # GCP Service Account credentials
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/key.json
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/live
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+          volumeMounts:
+            - name: google-cloud-key
+              mountPath: /var/secrets/google
+              readOnly: true
+        # Cloud SQL Proxy sidecar (if using private IP)
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.7.0
+          args:
+            - "--structured-logs"
+            - "--port=5432"
+            - "${PROJECT_ID}:${GCP_REGION}:almonds-db"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 2
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+      volumes:
+        - name: google-cloud-key
+          secret:
+            secretName: gcp-service-account-key
+      terminationGracePeriodSeconds: 30
+      # Node affinity for multi-zone deployment
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - almonds-api
+                topologyKey: topology.kubernetes.io/zone

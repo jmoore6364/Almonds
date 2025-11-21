@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: almonds-api
+  labels:
+    app: almonds-api
+  annotations:
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    # Request timeout
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # Body size limit (for file uploads)
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # SSL redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # CORS (if not handled by app)
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    # Connection upgrade for WebSockets
+    nginx.ingress.kubernetes.io/websocket-services: "almonds-api"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.almonds.io
+      secretName: almonds-tls
+  rules:
+    - host: api.almonds.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: almonds-api
+                port:
+                  number: 80

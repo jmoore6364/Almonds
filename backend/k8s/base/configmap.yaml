@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: almonds-config
+  labels:
+    app: almonds-api
+data:
+  # Redis configuration
+  redis-host: "redis-service"
+  redis-port: "6379"
+
+  # Application URLs
+  cors-origin: "https://app.almonds.io"
+  frontend-url: "https://app.almonds.io"
+
+  # Stripe price IDs (non-sensitive)
+  stripe-price-pro: "price_pro_monthly"
+  stripe-price-business: "price_business_monthly"
+  stripe-price-enterprise: "price_enterprise_monthly"
+
+  # Email configuration
+  from-email: "noreply@almonds.io"
+  from-name: "Almonds Team"
+
+  # Rate limiting
+  throttle-ttl: "60000"
+  throttle-limit: "100"
+
+  # Logging
+  log-level: "error"
+
+  # Health check configuration
+  health-check-database: "true"
+  health-check-redis: "true"

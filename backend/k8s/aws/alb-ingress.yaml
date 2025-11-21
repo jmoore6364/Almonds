@@ -1,0 +1,71 @@
+# AWS Application Load Balancer (ALB) Ingress Configuration
+# Requires: AWS Load Balancer Controller installed in cluster
+# https://kubernetes-sigs.github.io/aws-load-balancer-controller/
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: almonds-api-alb
+  namespace: default
+  labels:
+    app: almonds-api
+  annotations:
+    # Ingress class
+    kubernetes.io/ingress.class: alb
+
+    # ALB scheme (internet-facing or internal)
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    # Target type (ip mode for EKS with Fargate)
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # Health check configuration
+    alb.ingress.kubernetes.io/healthcheck-path: /api/v1/health/ready
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
+
+    # SSL/TLS configuration
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:${AWS_REGION}:${AWS_ACCOUNT_ID}:certificate/${CERTIFICATE_ID}
+
+    # Backend protocol
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+
+    # Target group attributes
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=86400
+
+    # Load balancer attributes
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60,deletion_protection.enabled=true
+
+    # Tags for AWS resources
+    alb.ingress.kubernetes.io/tags: Environment=production,Application=almonds,ManagedBy=kubernetes
+
+    # Security groups
+    alb.ingress.kubernetes.io/security-groups: ${ALB_SECURITY_GROUP_ID}
+
+    # Subnets (use public subnets for internet-facing ALB)
+    alb.ingress.kubernetes.io/subnets: ${PUBLIC_SUBNET_1},${PUBLIC_SUBNET_2},${PUBLIC_SUBNET_3}
+
+    # WAF ACL (Web Application Firewall)
+    # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:${AWS_REGION}:${AWS_ACCOUNT_ID}:regional/webacl/${WAF_ACL_NAME}/${WAF_ACL_ID}
+
+    # Shield Advanced (DDoS protection)
+    # alb.ingress.kubernetes.io/shield-advanced-protection: "true"
+
+spec:
+  rules:
+    - host: api.almonds.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: almonds-api
+                port:
+                  number: 80
