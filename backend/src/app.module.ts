@@ -25,8 +25,8 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     // Rate limiting
     ThrottlerModule.forRoot([
       {
-        ttl: parseInt(process.env.THROTTLE_TTL) || 60000, // 1 minute
-        limit: parseInt(process.env.THROTTLE_LIMIT) || 100, // 100 requests per minute
+        ttl: parseInt(process.env.THROTTLE_TTL || '60000'), // 1 minute
+        limit: parseInt(process.env.THROTTLE_LIMIT || '100'), // 100 requests per minute
       },
     ]),
 

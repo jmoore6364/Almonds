@@ -34,8 +34,8 @@ export class AuditController {
     }
 
     // Check if user is a member of the organization
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole) {
       throw new ForbiddenException('You are not a member of this organization');
     }
 
@@ -53,8 +53,8 @@ export class AuditController {
     }
 
     // Check if user is a member of the organization
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole) {
       throw new ForbiddenException('You are not a member of this organization');
     }
 
@@ -82,8 +82,8 @@ export class AuditController {
     }
 
     // Check if user has admin access
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can view audit statistics');
     }
 
@@ -106,8 +106,8 @@ export class AuditController {
     }
 
     // Check if user has admin access
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can export audit logs');
     }
 

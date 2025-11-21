@@ -34,9 +34,16 @@ export class UsersService {
     });
   }
 
-  async create(data: { email: string; name: string; passwordHash: string; emailVerificationToken?: string }) {
+  async create(data: { email: string; name: string; passwordHash?: string; emailVerificationToken?: string; emailVerified?: boolean; avatarUrl?: string | null }) {
     const user = await this.prisma.user.create({
-      data,
+      data: {
+        email: data.email,
+        name: data.name,
+        passwordHash: data.passwordHash || '',
+        emailVerificationToken: data.emailVerificationToken,
+        emailVerified: data.emailVerified ?? false,
+        avatarUrl: data.avatarUrl,
+      },
       select: {
         id: true,
         email: true,

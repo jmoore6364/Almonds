@@ -49,8 +49,8 @@ export class WebhooksController {
     }
 
     // Check if user has admin access
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can create webhooks');
     }
 
@@ -68,7 +68,7 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
     if (!member) {
       throw new ForbiddenException('You are not a member of this organization');
     }
@@ -87,7 +87,7 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
     if (!member) {
       throw new ForbiddenException('You are not a member of this organization');
     }
@@ -117,8 +117,8 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can update webhooks');
     }
 
@@ -141,8 +141,8 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can delete webhooks');
     }
 
@@ -170,8 +170,8 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can test webhooks');
     }
 
@@ -194,7 +194,7 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
     if (!member) {
       throw new ForbiddenException('You are not a member of this organization');
     }
@@ -218,8 +218,8 @@ export class WebhooksController {
       throw new ForbiddenException('Organization ID is required');
     }
 
-    const member = await this.organizationsService.getMemberRole(organizationId, req.user.id);
-    if (!member || !['owner', 'admin'].includes(member.role)) {
+    const memberRole = await this.organizationsService.getMemberRole(organizationId, req.user.id);
+    if (!memberRole || !['owner', 'admin'].includes(memberRole)) {
       throw new ForbiddenException('Only organization owners and admins can regenerate webhook secrets');
     }
 

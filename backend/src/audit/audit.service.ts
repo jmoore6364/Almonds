@@ -134,10 +134,10 @@ export class AuditService {
           },
         },
         orderBy: {
-          [query.sortBy]: query.sortOrder,
+          [query.sortBy as string]: query.sortOrder,
         },
-        take: query.limit,
-        skip: query.offset,
+        take: query.limit || 50,
+        skip: query.offset || 50,
       }),
       this.prisma.auditLog.count({ where }),
     ]);
@@ -146,9 +146,9 @@ export class AuditService {
       logs,
       pagination: {
         total,
-        limit: query.limit,
-        offset: query.offset,
-        hasMore: query.offset + query.limit < total,
+        limit: query.limit || 50,
+        offset: query.offset || 0,
+        hasMore: (query.offset || 0) + (query.limit || 50) < total,
       },
     };
   }
