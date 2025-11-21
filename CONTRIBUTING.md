@@ -1,187 +1,299 @@
 # Contributing to Almonds Resource Manager
 
-Thank you for your interest in contributing to Almonds! We appreciate your help in making this project better.
+Thank you for your interest in contributing to Almonds! This guide will help you get started with contributing to our full-stack SaaS platform.
+
+## 📋 Table of Contents
+
+- [Code of Conduct](#code-of-conduct)
+- [Getting Started](#getting-started)
+- [Development Setup](#development-setup)
+- [How to Contribute](#how-to-contribute)
+- [Coding Standards](#coding-standards)
+- [Testing Guidelines](#testing-guidelines)
+- [Commit Messages](#commit-messages)
+- [Pull Request Process](#pull-request-process)
+- [Issue Guidelines](#issue-guidelines)
 
 ## Code of Conduct
 
-By participating in this project, you agree to maintain a respectful and inclusive environment for everyone.
+### Our Pledge
 
-## How to Contribute
+We are committed to providing a welcoming and inclusive environment for all contributors.
 
-### Reporting Bugs
+### Expected Behavior
 
-1. Check if the bug has already been reported in [Issues](https://github.com/yourusername/almonds-resource-manager/issues)
-2. If not, create a new issue with:
-   - Clear, descriptive title
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Screenshots if applicable
-   - Environment details (OS, browser, versions)
+- Use welcoming and inclusive language
+- Respect differing viewpoints and experiences
+- Accept constructive criticism gracefully
+- Focus on what is best for the community
 
-### Suggesting Features
+### Unacceptable Behavior
 
-1. Check [Discussions](https://github.com/yourusername/almonds-resource-manager/discussions) for similar suggestions
-2. Create a new discussion in the Ideas category
-3. Describe the feature and its benefits
-4. Provide use cases and examples
+- Trolling, insulting comments, or personal attacks
+- Public or private harassment
+- Publishing others' private information without permission
 
-### Pull Requests
+## Getting Started
 
-1. **Fork and Clone**
-   ```bash
-   git clone https://github.com/yourusername/almonds-resource-manager.git
-   cd almonds-resource-manager
-   ```
+### Prerequisites
 
-2. **Create a Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   # or
-   git checkout -b fix/your-bug-fix
-   ```
+- Node.js 18+ and npm 9+
+- PostgreSQL 14+
+- Redis 6+
+- Docker (recommended)
+- Git
 
-3. **Make Changes**
-   - Follow the coding standards
-   - Write/update tests
-   - Update documentation
+### Fork and Clone
 
-4. **Test Your Changes**
-   ```bash
-   npm test
-   npm run lint
-   ```
+```bash
+# Fork the repository on GitHub
+git clone https://github.com/YOUR_USERNAME/almonds.git
+cd almonds
 
-5. **Commit**
-   ```bash
-   git commit -m "feat: add amazing feature"
-   ```
-
-   Use conventional commits:
-   - `feat:` New feature
-   - `fix:` Bug fix
-   - `docs:` Documentation changes
-   - `style:` Code style changes
-   - `refactor:` Code refactoring
-   - `test:` Test additions/changes
-   - `chore:` Build/tooling changes
-
-6. **Push and Create PR**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-   Then create a Pull Request on GitHub
-
-### PR Guidelines
-
-- Link related issues
-- Provide clear description of changes
-- Include screenshots for UI changes
-- Ensure all tests pass
-- Keep PRs focused and atomic
-- Update CHANGELOG.md if applicable
+# Add upstream remote
+git remote add upstream https://github.com/almonds/almonds.git
+```
 
 ## Development Setup
 
-See [README.md](README.md) for detailed setup instructions.
+### Backend Setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+
+# Start services
+docker-compose up -d
+
+# Run migrations
+npx prisma migrate dev
+
+# Start server
+npm run start:dev
+```
+
+### Frontend Setup
+
+```bash
+npm install
+npm start
+```
+
+## How to Contribute
+
+### Workflow
+
+1. **Create a branch**:
+   ```bash
+   git checkout -b feature/my-feature
+   ```
+
+2. **Make changes** following our coding standards
+
+3. **Add tests** for your changes
+
+4. **Run tests**:
+   ```bash
+   npm test
+   cd backend && npm run test:e2e
+   ```
+
+5. **Commit** using conventional commits:
+   ```bash
+   git commit -m "feat: add new feature"
+   ```
+
+6. **Push and open PR**:
+   ```bash
+   git push origin feature/my-feature
+   ```
 
 ## Coding Standards
 
-### TypeScript/Angular
-
-- Use TypeScript strict mode
-- Follow Angular style guide
-- Use meaningful variable names
-- Add JSDoc comments for public APIs
-- Prefer interfaces over types
-- Use RxJS operators appropriately
-
-### Component Structure
+### Backend (NestJS)
 
 ```typescript
-@Component({
-  selector: 'app-example',
-  templateUrl: './example.component.html',
-  styleUrls: ['./example.component.scss']
-})
-export class ExampleComponent implements OnInit {
-  // Public properties
-  public title = 'Example';
+// ✅ Good
+@Injectable()
+export class MyService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  // Observable streams
-  data$: Observable<Data>;
+  async findOne(id: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+}
 
-  constructor(
-    private service: ExampleService
-  ) {}
+// ✅ Use DTOs
+export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
+  @MinLength(6)
+  password: string;
+}
+```
+
+### Frontend (Angular)
+
+```typescript
+// ✅ Use reactive programming
+export class ResourceListComponent implements OnInit {
+  resources$: Observable<Resource[]>;
+
+  constructor(private resourceService: ResourceService) {}
 
   ngOnInit() {
-    this.loadData();
-  }
-
-  // Public methods
-  loadData() {
-    this.data$ = this.service.getData();
-  }
-
-  // Private methods
-  private helperMethod() {
-    // Implementation
+    this.resources$ = this.resourceService.getResources();
   }
 }
 ```
 
-### CSS/SCSS
+### Linting
 
-- Use Ionic CSS utilities when possible
-- Follow BEM naming convention for custom classes
-- Keep selectors specific but not overly nested
-- Use CSS variables for theming
+```bash
+npm run lint        # Check
+npm run lint:fix    # Fix
+npm run format      # Format
+```
 
-### Testing
+## Testing Guidelines
 
-- Write unit tests for all services
-- Test component logic (not implementation details)
-- Aim for >80% code coverage
-- Use descriptive test names
+### Coverage Requirements
+
+- Minimum: 80% coverage
+- Critical paths: 100% (auth, billing, permissions)
+- New features must include tests
+
+### Test Examples
 
 ```typescript
-describe('ResourceService', () => {
-  it('should fetch all resources', () => {
-    // Test implementation
-  });
+describe('AuthService', () => {
+  it('should validate user credentials', async () => {
+    // Arrange
+    mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-  it('should handle errors gracefully', () => {
-    // Test implementation
+    // Act
+    const result = await service.validateUser('test@example.com', 'password');
+
+    // Assert
+    expect(result).toBeDefined();
   });
 });
 ```
 
-## Project Structure
+## Commit Messages
 
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```bash
+feat: add user profile endpoint
+fix(auth): resolve token expiration
+docs: update API reference
+test: add billing service tests
+chore: update dependencies
 ```
-src/app/
-├── core/          # Singleton services, guards
-├── features/      # Feature modules (lazy loaded)
-├── shared/        # Shared components, directives, pipes
-└── models/        # Data models and interfaces
+
+### Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation
+- `style`: Code style
+- `refactor`: Refactoring
+- `test`: Tests
+- `chore`: Maintenance
+
+## Pull Request Process
+
+### Before Submitting
+
+- [ ] Code follows style guidelines
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] Commit messages follow convention
+
+### PR Checklist
+
+1. **Title**: Clear and descriptive
+2. **Description**: What, why, how to test
+3. **Tests**: All passing
+4. **Size**: < 500 lines preferred
+
+### After Merge
+
+```bash
+git checkout main
+git pull upstream main
 ```
 
-## Adding New Cloud Providers
+## Issue Guidelines
 
-1. Create provider service in `src/app/core/services/providers/`
-2. Extend `BaseProviderService`
-3. Implement all required methods
-4. Add provider to `CloudProvider` enum
-5. Update `ProviderService` initialization
-6. Add provider icon mapping
-7. Create connection form in `ProviderConnectPage`
-8. Write tests
-9. Update documentation
+### Bug Report Template
+
+```markdown
+**Describe the bug**
+Clear description
+
+**To Reproduce**
+1. Step 1
+2. Step 2
+
+**Expected behavior**
+What should happen
+
+**Environment**
+- OS: macOS 13.0
+- Browser: Chrome 120
+- Version: 1.0.0
+```
+
+### Feature Request Template
+
+```markdown
+**Problem**
+Description of problem
+
+**Solution**
+Desired solution
+
+**Alternatives**
+Other options considered
+```
+
+## Development Tips
+
+### Debugging
+
+```bash
+# Backend
+npm run start:debug
+
+# Database
+npx prisma studio
+```
+
+### Common Commands
+
+```bash
+npm install              # Install dependencies
+npm run start:dev        # Start development
+npm test                 # Run tests
+npm run lint             # Lint code
+npm run format           # Format code
+```
 
 ## Questions?
 
-- Join our [Discussions](https://github.com/yourusername/almonds-resource-manager/discussions)
-- Check the [Wiki](https://github.com/yourusername/almonds-resource-manager/wiki)
-- Email: dev@almonds.io
+- Check [documentation](https://docs.almonds.io)
+- Review [API reference](backend/API.md)
+- Ask in GitHub Discussions
+- Contact: support@almonds.io
 
-Thank you for contributing!
+---
+
+**Thank you for contributing! 🎉**
