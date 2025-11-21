@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Cloud Provider Integrations** - Production-ready AWS and Azure resource management
+  - AWS SDK integration (EC2, S3, RDS, Lambda, Cost Explorer)
+  - Azure ARM SDK integration (VMs, Storage Accounts)
+  - Automatic resource discovery and synchronization
+  - Provider connection testing endpoint
+  - Real-time resource status tracking
+  - Cost data retrieval from AWS Cost Explorer
+  - Resource management actions (start, stop, terminate, deallocate)
+  - Comprehensive test coverage for both providers
+  - Complete cloud provider documentation (CLOUD_PROVIDERS.md)
+  - IAM permission requirements and best practices
+- `getMemberRole` method in OrganizationsService for permission checks
 - Comprehensive testing infrastructure with 350+ test cases
 - Complete API documentation (API.md)
 - Testing guide (TEST.md)
