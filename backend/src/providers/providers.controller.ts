@@ -51,4 +51,10 @@ export class ProvidersController {
   async sync(@Param('id') id: string, @Request() req) {
     return this.providersService.syncResources(id, req.user.userId);
   }
+
+  @Post(':id/test')
+  @ApiOperation({ summary: 'Test cloud provider connection' })
+  async testConnection(@Param('id') id: string, @Request() req) {
+    return this.providersService.testConnection(id, req.user.userId);
+  }
 }

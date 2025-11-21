@@ -130,6 +130,19 @@ export class OrganizationsService {
     });
   }
 
+  async getMemberRole(organizationId: string, userId: string): Promise<string | null> {
+    const member = await this.prisma.organizationMember.findUnique({
+      where: {
+        organizationId_userId: {
+          organizationId,
+          userId,
+        },
+      },
+    });
+
+    return member?.role || null;
+  }
+
   // Helper methods
   private async verifyMembership(organizationId: string, userId: string) {
     const member = await this.prisma.organizationMember.findUnique({
