@@ -11,6 +11,7 @@ import { ResourcesModule } from './resources/resources.module';
 import { ProvidersModule } from './providers/providers.module';
 import { BillingModule } from './billing/billing.module';
 import { HealthModule } from './health/health.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { HealthModule } from './health/health.module';
     ResourcesModule,
     ProvidersModule,
     BillingModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
