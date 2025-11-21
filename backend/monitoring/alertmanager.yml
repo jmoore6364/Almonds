@@ -1,0 +1,145 @@
+# Alertmanager Configuration for Almonds
+
+global:
+  resolve_timeout: 5m
+  # Email configuration (update with your SMTP settings)
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@almonds.io'
+  smtp_auth_username: 'alerts@almonds.io'
+  smtp_auth_password: 'your-app-password'
+  smtp_require_tls: true
+
+# Templates for alert notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Alert routing configuration
+route:
+  # Default receiver for all alerts
+  receiver: 'team-email'
+
+  # Group alerts by these labels
+  group_by: ['alertname', 'severity', 'service']
+
+  # Wait time before sending initial notification
+  group_wait: 30s
+
+  # Wait time before sending notifications about new alerts
+  group_interval: 5m
+
+  # Wait time before re-sending resolved alerts
+  repeat_interval: 12h
+
+  # Child routes for specific alert types
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 5m
+      continue: true
+
+    # Database alerts
+    - match:
+        service: database
+      receiver: 'database-team'
+      group_wait: 1m
+      continue: true
+
+    # Billing/Payment alerts
+    - match:
+        service: billing
+      receiver: 'billing-team'
+      group_wait: 30s
+      continue: true
+
+    # Auth/Security alerts
+    - match:
+        service: auth
+      receiver: 'security-team'
+      group_wait: 30s
+
+# Alert receivers
+receivers:
+  # Default email receiver
+  - name: 'team-email'
+    email_configs:
+      - to: 'team@almonds.io'
+        send_resolved: true
+        headers:
+          Subject: '[Almonds] {{ .GroupLabels.alertname }}: {{ .GroupLabels.severity }}'
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@almonds.io,team@almonds.io'
+        send_resolved: true
+        headers:
+          Subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
+
+    # Slack webhook (update with your webhook URL)
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-critical'
+        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+    # PagerDuty integration (update with your integration key)
+    # pagerduty_configs:
+    #   - service_key: 'your-pagerduty-integration-key'
+    #     description: '{{ .GroupLabels.alertname }}'
+
+  # Database team
+  - name: 'database-team'
+    email_configs:
+      - to: 'database@almonds.io'
+        send_resolved: true
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-database'
+        send_resolved: true
+
+  # Billing team
+  - name: 'billing-team'
+    email_configs:
+      - to: 'billing@almonds.io'
+        send_resolved: true
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-billing'
+        send_resolved: true
+
+  # Security team
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@almonds.io'
+        send_resolved: true
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-security'
+        send_resolved: true
+
+# Inhibition rules - suppress alerts when related alerts are firing
+inhibit_rules:
+  # Suppress warning alerts if critical alert is firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service', 'alertname']
+
+  # Suppress individual service alerts if entire API is down
+  - source_match:
+      alertname: 'APIDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['service']
+
+  # Suppress database connection alerts if database is down
+  - source_match:
+      alertname: 'DatabaseDown'
+    target_match:
+      service: 'database'
+    equal: ['environment']
