@@ -1,0 +1,215 @@
+# Prometheus Alert Rules for Almonds API
+
+groups:
+  - name: api_alerts
+    interval: 30s
+    rules:
+      # API is down
+      - alert: APIDown
+        expr: up{job="almonds-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "Almonds API is down"
+          description: "The Almonds API has been down for more than 1 minute."
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High API error rate"
+          description: "Error rate is above 5% (current value: {{ $value | humanizePercentage }})"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile response time is above 1 second (current: {{ $value }}s)"
+
+      # High request rate
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[1m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+          service: api
+        annotations:
+          summary: "High request rate detected"
+          description: "Request rate is above 1000 req/s (current: {{ $value }})"
+
+      # Database connection issues
+      - alert: DatabaseConnectionIssues
+        expr: database_connections_failed_total > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database connection failures"
+          description: "More than 10 database connection failures detected"
+
+      # Memory usage high
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / node_memory_MemTotal_bytes) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90% (current: {{ $value | humanizePercentage }})"
+
+      # CPU usage high
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 90% (current: {{ $value | humanizePercentage }})"
+
+  - name: authentication_alerts
+    interval: 30s
+    rules:
+      # High failed login attempts
+      - alert: HighFailedLoginAttempts
+        expr: rate(auth_login_failed_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High failed login attempt rate"
+          description: "More than 10 failed login attempts per second detected. Possible brute force attack."
+
+      # JWT token validation failures
+      - alert: HighJWTValidationFailures
+        expr: rate(jwt_validation_failed_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High JWT validation failure rate"
+          description: "Increased JWT validation failures detected"
+
+  - name: billing_alerts
+    interval: 60s
+    rules:
+      # Stripe webhook failures
+      - alert: StripeWebhookFailures
+        expr: rate(stripe_webhook_failed_total[15m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: billing
+        annotations:
+          summary: "Stripe webhook failures detected"
+          description: "Stripe webhooks are failing. Subscription status may not be updated."
+
+      # Payment processing failures
+      - alert: PaymentProcessingFailures
+        expr: rate(payment_processing_failed_total[30m]) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          service: billing
+        annotations:
+          summary: "Payment processing failures"
+          description: "High rate of payment processing failures detected"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # Database down
+      - alert: DatabaseDown
+        expr: up{job="postgresql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "Cannot connect to PostgreSQL database"
+
+      # High database connections
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database connection count is high (current: {{ $value }})"
+
+      # Slow queries
+      - alert: SlowDatabaseQueries
+        expr: rate(pg_stat_statements_mean_exec_time[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query execution time is above 1 second"
+
+      # Database disk usage
+      - alert: HighDatabaseDiskUsage
+        expr: (pg_database_size_bytes / node_filesystem_size_bytes) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database disk usage"
+          description: "Database disk usage is above 85%"
+
+  - name: redis_alerts
+    interval: 30s
+    rules:
+      # Redis down
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis is down"
+          description: "Cannot connect to Redis cache"
+
+      # High Redis memory usage
+      - alert: HighRedisMemoryUsage
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is above 90%"
+
+      # Redis connection pool exhausted
+      - alert: RedisConnectionPoolExhausted
+        expr: redis_connected_clients >= redis_config_maxclients * 0.95
+        for: 2m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis connection pool almost exhausted"
+          description: "Redis connection pool is at 95% capacity"
