@@ -212,7 +212,7 @@ export class AuthService {
   }
 
   async generateTwoFactorSecret(userId: string) {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId, true);
 
     // Generate secret
     const secret = speakeasy.generateSecret({
@@ -233,7 +233,7 @@ export class AuthService {
   }
 
   async enableTwoFactor(userId: string, code: string) {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId, true);
 
     if (!user.twoFactorSecret) {
       throw new BadRequestException('Two-factor secret not generated. Call generate-2fa first');
@@ -261,7 +261,7 @@ export class AuthService {
   }
 
   async disableTwoFactor(userId: string, code: string) {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId, true);
 
     if (!user.twoFactorEnabled) {
       throw new BadRequestException('Two-factor authentication is not enabled');
@@ -289,7 +289,7 @@ export class AuthService {
   }
 
   async verifyTwoFactorCode(userId: string, code: string): Promise<boolean> {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId, true);
 
     if (!user.twoFactorEnabled || !user.twoFactorSecret) {
       return false;

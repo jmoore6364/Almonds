@@ -6,7 +6,7 @@ import { UpdateUserDto } from './dto/user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findById(id: string) {
+  async findById(id: string, includeSensitive = false) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -18,6 +18,11 @@ export class UsersService {
         lastLogin: true,
         createdAt: true,
         updatedAt: true,
+        ...(includeSensitive && {
+          twoFactorSecret: true,
+          twoFactorEnabled: true,
+          passwordHash: true,
+        }),
       },
     });
 
