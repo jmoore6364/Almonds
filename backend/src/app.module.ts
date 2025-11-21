@@ -12,6 +12,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { BillingModule } from './billing/billing.module';
 import { HealthModule } from './health/health.module';
 import { AuditModule } from './audit/audit.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuditModule } from './audit/audit.module';
     ProvidersModule,
     BillingModule,
     AuditModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
